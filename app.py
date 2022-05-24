@@ -1,5 +1,4 @@
 import random
-from turtle import pd
 from flask import Flask, render_template, request, session
 from musicgen import create_pdf, main, buat_chromosome, get_keyscale, create_midi, single_point_crossover, tournament_selection, mutation, noteLength
 import secrets
@@ -88,5 +87,5 @@ def start():
 	return render_template("index.html", path=path, generation_num=user_dict[ukey][3])
 
 # main driver function
-if __name__ == '__main__':
-	app.run(debug=True)
+# if __name__ == '__main__':
+# 	app.run(debug=True)
