@@ -173,7 +173,7 @@ def create_pdf(population, tngganada, nd_dasar, generation_id):
     os.makedirs(f"static/uploads/{time_folder}/{generation_id}", exist_ok=True)
     for count, x in enumerate(population):
         x.keySignature = key.Key(nd_dasar, tngganada)
-        x.write('musicxml', fp=f"static/uploads/{time_folder}/{generation_id}/test"+ str(count))
+        x.write('musicxml.pdf', fp=f"static/uploads/{time_folder}/{generation_id}/test"+ str(count))
         x.pop(0)
     #s = corpus.parse(littleMelody)
     #littleMelody.show('midi')
