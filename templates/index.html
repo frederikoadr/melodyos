@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
         <!--=============== FAVICON ===============-->
-        <link rel="shortcut icon" href="static/img/mlogo" type="image/x-icon">
+        <link rel="shortcut icon" href="static/img/applogo.png" type="image/x-icon">
 
         <!--=============== BOXICONS ===============-->
         <link rel="stylesheet" href="https://unpkg.com/boxicons@latest/css/boxicons.min.css">
@@ -23,7 +23,7 @@
         <header class="header" id="header">
             <nav class="nav container">
                 <a href="#" class="nav__logo">
-                    <img src="static/img/mlogo.png" alt="" class="nav__logo-img">
+                    <img src="static/img/applogo.png" alt="" class="nav__logo-img">
                     Melodyos
                 </a>
                 <div class="nav__menu" id="nav-menu">
@@ -62,7 +62,7 @@
             <!--==================== HOME ====================-->
             <section class="home" id="home">
                 <div class="home__container grid">
-                    <img src="static/img/mlogo.png" alt="" class="home__img">
+                    <img src="static/img/applogo.png" alt="" class="home__img">
                     <div class="home__data">
                         <h1 class="home__title">
                             Melodyos
@@ -198,18 +198,18 @@
                         </article>
                         {% endfor %}
                         <div class="content">
-                            <div class="inner">
-                                <p>the melody can be improved again by continuing to rate or evaluate</p>
-                                <input type="hidden" name="step" value="evaluate">
-                                <input type="hidden" name="numMelodies" value={{path|count}}>
-                                <button type="submit" value="submit" class="button">Continue</button>
-                                </form>
-                                <form action="#new" method="post">
-                                <p>or if its enough, you can start downloading the results</p>
-                                <input type="hidden" name="pathMelodies" value={{path|count}}>
-                                <button type="submit" name="step" value="download" class="button">Download</button>
-                                </form>
-                            </div>
+                            <p>the melody can be improved again by continuing to rate or evaluate</p>
+                            <input type="hidden" name="step" value="evaluate">
+                            <input type="hidden" name="numMelodies" value={{path|count}}>
+                            <button type="submit" value="submit" class="button">Continue</button>
+                            </form>
+                            <form action="#new" method="post">
+                            <p>or if its enough, you can start downloading the results</p>
+                            <input type="hidden" name="pathMelodies" value={{path|count}}>
+                            <button type="submit" name="step" value="download" class="button">Download</button>
+                            </form>
+                            <p>or restart from beginnig</p>
+                            <a href="#criteria" class="button">Restart</a>
                         </div>
                     {% endif %}
                 </div>
@@ -254,13 +254,13 @@
             <!--==================== MESSAGE ====================-->
             <section class="message section container">
                 <div class="message__container grid">
-                    <form action="" class="message__form">
-                        <h2 class="message__title">Meet the Dev</h2>
-                        <!-- <input type="email" placeholder="Write your message" class="message__input">
-                        <button class="button message__button">Send Message</button> -->
-                    </form>
+                    <!-- <form action="" class="message__form">
+                        <h2 class="message__title">Meet the dev</h2>
+                        <input type="email" placeholder="Write your message" class="message__input">
+                        <button class="button message__button">Send Message</button>
+                    </form> -->
 
-                    <img src="static/img/KTM.jpg" alt="" class="message__img">
+                    <img src="static/img/Logo_PENS.png" alt="" class="message__img">
                 </div>
             </section>
         </main>

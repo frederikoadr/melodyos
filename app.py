@@ -55,11 +55,23 @@ def start():
 			
 			population_fitness = [(user_dict[ukey][0][idx], fitnes) for idx, fitnes in enumerate(rate)]
 			selectedParents = []
-			while int(len(population_fitness)) > 1:
+
+			#tournament selection w/ removing selcted, for diversity among population; q:does it necessary?
+			# while int(len(population_fitness)) > 1:
+			# 	a = tournament_selection(population_fitness)
+			# 	print("winner : " + str(a))
+			# 	b = population_fitness.pop(a)[0] 
+			# 	selectedParents.append(b)
+
+			#opposite above loop
+			pop_length = int(len(population_fitness))
+			while pop_length > 1:
 				a = tournament_selection(population_fitness)
 				print("winner : " + str(a))
-				b = population_fitness.pop(a)[0]
+				b = population_fitness[a][0]
 				selectedParents.append(b)
+				pop_length -= 1
+				
 			selectedParents.append(population_fitness[0][0])
 			offsprings = []
 			for num in range(int(len(selectedParents))):
