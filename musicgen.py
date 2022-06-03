@@ -3,6 +3,7 @@ from datetime import datetime, time
 from music21 import corpus, instrument, note, stream, converter, midi, scale, audioSearch, alpha, configure, key
 from music21.environment import keys
 import os
+import shutil
 import matplotlib.pyplot as plt
 import numpy as np
 import random
@@ -161,11 +162,15 @@ def create_midi(population, tngganada, nd_dasar, generation_id, inst):
             x.insert(instrument.Marimba())
         
         x.keySignature = key.Key(nd_dasar, tngganada)
-        fp=f"static/uploads/{time_folder}/{generation_id}/test"+ str(count)
+        fp=f"static/uploads/{time_folder}/{generation_id}/rank"+ str(count) + "_" + inst + "_" + nd_dasar + tngganada
         allFiles.append(fp)
         x.write('midi', fp + '.mid')
         x.pop(0)
         x.pop(0)
+
+    fp_prev = f"static/uploads/{time_folder}/{generation_id-1}"
+    if os.path.exists(fp_prev) and os.path.isdir(fp_prev):
+        shutil.rmtree(fp_prev)
         # allFiles.append(f"static/uploads/{time_folder}/{generation_id}/test"+ str(count) +'.mid')
     return allFiles
 
