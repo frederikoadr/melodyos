@@ -37,6 +37,19 @@ function scrollHeader(){
 }
 window.addEventListener('scroll', scrollHeader)
 
+/*=============== SUBMIT FORM ===============*/
+form.addEventListener('submit', function(event) {
+    event.preventDefault();    // prevent page from refreshing
+    const formData = new FormData(form);  // grab the data inside the form fields
+    fetch('/evaluate', {   // assuming the backend is hosted on the same server
+        method: 'POST',
+        body: formData,
+    }).then(function(response) {
+        // do something with the response if needed.
+        // If you want the table to be built only after the backend handles the request and replies, call buildTable() here.
+    });
+});
+
 /*=============== NEW SWIPER ===============*/
 var swiper = new Swiper(".new-swiper", {
     spaceBetween: 24,
@@ -125,4 +138,4 @@ const sr = ScrollReveal({
   sr.reveal(`.home__data`, {delay: 500})
   sr.reveal(`.giving__content, .gift__card`,{interval: 100})
   sr.reveal(`.celebrate__data, .message__form, .footer__img1`,{origin: 'left'})
-  sr.reveal(`.celebrate__img, .message__img, .footer__img2`,{origin: 'right'})
+  sr.reveal(`.celebrate__img, .userinfo, .message__img, .footer__img2`,{origin: 'right'})
