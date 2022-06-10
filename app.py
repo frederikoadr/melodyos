@@ -215,6 +215,7 @@ def data():
 		ax_single.set_title("Tingkat ketertarikan/fitness di setiap iterasi")
 		ax_single.set_xlabel("Iterasi / Generasi-1")
 		ax_single.set_ylabel("Presentase ketertarikan/fitness")
+		fig_single.savefig('static/uploads/fig'+str(user_count)+'.jpg', dpi=75)
 		
 		users_data.append([user.key(), user.val()[0], user.val()[1], user.val()[2], user.val()[3], user.val()[6], user.val()[7]])
 
