@@ -71,12 +71,12 @@
                             melodyos is a tool that can create musical ideas in the form of short melodic phrases based on collaboration between genetic algorithms and users without the need to understand music theory
                             <!-- to help the process of exploring ideas in making musical works. -->
                         </p>
-                        <a href="#criteria" class="button">Get Started</a>
+                        <a href="#user" class="button">Get Started</a>
                     </div>
                 </div>
             </section>
 
-            <!--==================== GIVING ====================-->
+            <!--==================== Glossary ====================-->
             <section class="giving section container">
                 <h2 class="section__title">
                     Music Elements Glossary
@@ -104,7 +104,30 @@
                 </div>
             </section>
 
-            <!--==================== CELEBRATE ====================-->
+            <!--==================== User ====================-->
+            
+            <form action="#gift" method="post">
+            <section class="userinfo section container" id="user">
+                <h2 class="section__title">
+                    Tell me about you
+                </h2>
+                <p class="section__subtitle">*for research purposes</p>
+
+                <div class="userinfo__data">
+                    <label for="not">Nickname</label>
+                    <input type="text" name="Nickname" value="Guest" maxlength="20" required>
+                    <label for="not">Age</label>
+                    <input type="number" name="Age" value="18" min="9" max="99" required>
+                    <label for="not">Experience in music production</label>
+                    <select name="Experience" id="Experience">
+                        <option value="beginner">I'm a beginner in making music</option>
+                        <option value="experienced">I have earned income from making music</option>
+                    </select>
+                    <a href="#criteria" class="button">Next</a>
+                </div>
+            </section>
+
+            <!--==================== Select ====================-->
             <section class="celebrate section container" id="criteria">
                 <div class="celebrate__container grid">
                     <div class="celebrate__data">
@@ -116,10 +139,10 @@
                         </p>
                     </div>
                     <div class="celebrate__data">
-                        <form action="#gift" method="post">
-                            <label for="melodi">Number of melodies</label>
+                        <!-- <form action="#gift" method="post"> -->
+                            <label for="melodi">Number of melodic variants</label>
                             <input type="number" name="numMelodies" value="4" min="4" max="12" required>
-                            <label for="not">Number of notes</label>
+                            <label for="not">Number of notes on melody</label>
                             <input type="number" name="numNotes" value="8" min="8" max="16" required>
                             <label for="not">Scale (Tangga Nada)</label>
                             <select name="scale" id="scale">
@@ -162,18 +185,19 @@
                 </div>
             </section>
 
-            <!--==================== GIFT ====================-->
+            <!--==================== RATE ====================-->
             <section class="gift section container" id="gift">
                 <h2 class="section__title">
                     Rate Melodies
                 </h2>
+                <p class="section__subtitle">*please rate at least up to 5 generations, thank you :)</p>
                 {% if path %}
-                    <form action="#gift" method="post">
+                    <form action="/evaluate#gift" method="post">
                     <div class="gift__container grid">
                     <h3>Generation {{generation_num}}</h3>
                         {% for result in path %}
                         <article class="gift__card">
-                            <h3>Melody {{loop.index}}</h3>
+                            <h3>Melody rank {{loop.index}}</h3>
                             <div id="midi{{loop.index}}" class="section3">
                                 <midi-player
                                     src={{result}}.mid
@@ -203,19 +227,22 @@
                             <input type="hidden" name="numMelodies" value={{path|count}}>
                             <button type="submit" value="submit" class="button">Continue</button>
                             </form>
-                            <form action="#new" method="post">
+                            {% if generation_num > 4 %}
+                            <form action="/download#new" method="post">
                             <p>or if its enough, you can start downloading the results</p>
                             <input type="hidden" name="pathMelodies" value={{path|count}}>
                             <button type="submit" name="step" value="download" class="button">Download</button>
                             </form>
-                            <p>or restart from beginnig</p>
-                            <a href="#criteria" class="button">Restart</a>
+                            {% endif %}
+                            <!-- <p>or restart from beginnig</p>
+                            <a href="#user" class="button">Restart</a> -->
                         </div>
                     {% endif %}
                 </div>
             </section>
 
-            <!--==================== NEW ====================-->
+            {% if done %}
+            <!--==================== DOWNLOAD ====================-->
             <section class="new section container" id="new">
                 <h2 class="section__title">
                     Download Results
@@ -230,7 +257,7 @@
                             <article class="new__card swiper-slide">
                                 <div class="new__overlay"></div>
                                 
-                                <h3>Melody {{loop.index}}</h3>
+                                <h3>Melody rank {{loop.index}}</h3>
                                 <a href="{{result}}.mid" class="button download__button"><i class='bx bx-download'></i> .MIDI</a>
                                 <!-- <a href="{{result}}.pdf" class="button download__button"><i class='bx bx-download'></i> .PDF</a> -->
                                 <a href="{{result}}.musicxml" class="button download__button"><i class='bx bx-download'></i> .XML</a>
@@ -251,14 +278,34 @@
                 </div>
             </section>
 
+            <!--==================== STATS ====================-->
+            <section class="celebrate section container" id="criteria">
+                <div class="celebrate__container grid">
+                    <div class="celebrate__data">
+                        <h2 class="section__title celebrate__title">
+                            Stats
+                        </h2>
+                        <p class="celebrate__description">
+                            the following is the percentage of fitness per iteration to see your level of interest obtained from the following function :
+                        </p>
+                        <p>\(\sum _{i=1}^{n} x_{i} \div ( n\times 5) \times 100\%\)</p>
+                        <p>\(n\) = number of melodic variants</p>
+                    </div>
+                    <div class="celebrate__data">
+                        <img src="static/uploads/user_fig.jpg" alt="gambar tingkat ketertarikan di setiap iterasi">
+                    </div>
+                </div>
+            </section>
+            {%endif%}
+
             <!--==================== MESSAGE ====================-->
             <section class="message section container">
                 <div class="message__container grid">
-                    <!-- <form action="" class="message__form">
-                        <h2 class="message__title">Meet the dev</h2>
-                        <input type="email" placeholder="Write your message" class="message__input">
-                        <button class="button message__button">Send Message</button>
-                    </form> -->
+                    <form action="" class="message__form">
+                        <h2 class="message__title">Developed in</h2>
+                        <!-- <input type="email" placeholder="Write your message" class="message__input">
+                        <button class="button message__button">Send Message</button> -->
+                    </form>
 
                     <img src="static/img/Logo_PENS.png" alt="" class="message__img">
                 </div>
@@ -342,5 +389,9 @@
 
         <!--=============== MIDI JS ===============-->
         <script src="https://cdn.jsdelivr.net/combine/npm/tone@14.7.58,npm/@magenta/music@1.23.1/es6/core.js,npm/focus-visible@5,npm/html-midi-player@1.4.0"></script>
+
+        <!--=============== MATHJAX ===============-->
+        <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+        <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     </body>
 </html>

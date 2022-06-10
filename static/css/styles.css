@@ -121,6 +121,16 @@ button {
   cursor: pointer;
 }
 
+table, th, td {
+  border: solid 1px #000;
+  padding: 10px;
+}
+
+table {
+    border-collapse:collapse;
+    caption-side:bottom;
+}
+
 /*========== Variables Dark theme ==========*/
 body.dark-theme{
   /* --title-color: hsl(355, 4%, 95%);
@@ -187,6 +197,11 @@ body.dark-theme{
 
 .section__title {
   font-size: var(--h2-font-size);
+  margin-bottom: var(--mb-2-5);
+  text-align: center;
+}
+.section__subtitle{
+  font-size: var(--smaller-font-size);
   margin-bottom: var(--mb-2-5);
   text-align: center;
 }
@@ -366,6 +381,10 @@ body.dark-theme{
 
 .giving__img:hover{
   transform: translateY(-.25rem);
+}
+/*=============== USER ===============*/
+.userinfo__data{
+  text-align: center;
 }
 
 /*=============== CELEBRATE ===============*/
@@ -943,6 +962,7 @@ select::-ms-expand {
     column-gap: 5rem;
   }
 
+  .userinfo__data,
   .celebrate__data,
   .celebrate__title{
     text-align: initial;

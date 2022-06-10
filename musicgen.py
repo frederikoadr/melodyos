@@ -162,7 +162,7 @@ def create_midi(population, tngganada, nd_dasar, generation_id, inst):
             x.insert(instrument.Marimba())
         
         x.keySignature = key.Key(nd_dasar, tngganada)
-        fp=f"static/uploads/{time_folder}/{generation_id}/rank"+ str(count) + "_" + inst + "_" + nd_dasar + tngganada
+        fp=f"static/uploads/{time_folder}/{generation_id}/rank"+ str(count) + "_" + nd_dasar + tngganada
         allFiles.append(fp)
         x.write('midi', fp + '.mid')
         x.pop(0)
@@ -178,7 +178,7 @@ def create_pdf(population, tngganada, nd_dasar, generation_id):
     os.makedirs(f"static/uploads/{time_folder}/{generation_id}", exist_ok=True)
     for count, x in enumerate(population):
         x.keySignature = key.Key(nd_dasar, tngganada)
-        x.write('musicxml', fp=f"static/uploads/{time_folder}/{generation_id}/test"+ str(count))
+        x.write('musicxml', fp=f"static/uploads/{time_folder}/{generation_id}/rank"+ str(count) + "_" + nd_dasar + tngganada)
         x.pop(0)
     #s = corpus.parse(littleMelody)
     #littleMelody.show('midi')
