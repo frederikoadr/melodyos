@@ -13,11 +13,7 @@ from dotenv import load_dotenv
 app = Flask(__name__)
 app.secret_key = secrets.token_urlsafe(16)
 UPLOAD_FOLDER = 'uploads/'
- 
-app.secret_key = secrets.token_urlsafe(16)
-#app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-
-firebase_config = {
+ firebase_config = {
     'apiKey': os.getenv('FIREBASE_API_KEY'),
     'authDomain': os.getenv('FIREBASE_AUTH_DOMAIN'),
     'databaseURL': os.getenv('FIREBASE_DATABASE_URL'),
@@ -47,8 +43,6 @@ def index():
 
 @app.route('/', methods=['POST', 'GET'])
 def start():
-	path = ''
-	ukey = ''
 	generation_num = 1
 	if request.method=='POST':
 		stepValue = request.form["step"]
