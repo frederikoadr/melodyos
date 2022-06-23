@@ -141,6 +141,7 @@ def download():
 def downloadpdf(index_pop):
 	if 'user' in session:
 		ukey = session['user']
+	print(ukey)
 	pdfpath = create_pdf(user_dict[ukey]["population"][int(index_pop)-1], user_dict[ukey]["db_data"][0], user_dict[ukey]["db_data"][1], user_dict[ukey]["db_data"][2], index_pop)
 
 	return send_file(pdfpath, as_attachment=True)
