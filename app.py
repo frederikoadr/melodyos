@@ -75,7 +75,7 @@ def evaluate():
 		if 'user' in session:
 			ukey = session['user']
 		rate = []
-		population_size= len(user_dict[ukey]["db_data"][4])
+		population_size = len(user_dict[ukey]["population"])
 		print("population size " + str(population_size))
 		for x in range(population_size):
 			rate.append(int(request.form.get("rating" + str(x+1))))
