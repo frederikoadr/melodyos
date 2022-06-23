@@ -12,7 +12,6 @@ import os
 app = Flask(__name__)
 app.secret_key = secrets.token_urlsafe(16)
 UPLOAD_FOLDER = 'uploads/'
- 
 
 firebaseConfig = {
   'apiKey': "AIzaSyC8BWJ8Y_9Y1I5em8tDywHFWT21tm8ThKo",
@@ -44,8 +43,6 @@ def index():
 
 @app.route('/', methods=['POST', 'GET'])
 def start():
-	path = ''
-	ukey = ''
 	generation_num = 1
 	if request.method=='POST':
 		stepValue = request.form["step"]
