@@ -1,7 +1,6 @@
 from random import choices, randrange, sample
 from datetime import datetime, time
-from music21 import corpus, instrument, note, stream, converter, midi, scale, audioSearch, alpha, configure, key
-from music21.environment import keys
+from music21 import instrument, note, stream, converter, midi, scale, audioSearch, alpha, configure, key, environment
 import os
 import shutil
 import matplotlib.pyplot as plt
@@ -9,9 +8,11 @@ import numpy as np
 import random
 import click
 
-
 KEYS = ["C", "C#", "Db", "D", "D#", "Eb", "E", "F", "F#", "Gb", "G", "G#", "Ab", "A", "A#", "Bb", "B"]
 noteLength = [.5, 1, 2]
+
+us = environment.UserSettings()
+us['lilypondPath'] = 'LilyPond/usr/bin/lilypond.exe'
 
 Chromosome = stream.Stream()
 time_folder = str(int(datetime.now().timestamp()))
@@ -162,7 +163,7 @@ def create_midi(population, tngganada, nd_dasar, generation_id, inst):
             x.insert(instrument.Marimba())
         
         x.keySignature = key.Key(nd_dasar, tngganada)
-        fp=f"static/uploads/{time_folder}/{generation_id}/rank"+ str(count) + "_" + nd_dasar + tngganada
+        fp=f"static/uploads/{time_folder}/{generation_id}/rank"+ str(count+1) + "_" + nd_dasar + tngganada
         allFiles.append(fp)
         x.write('midi', fp + '.mid')
         x.pop(0)
@@ -174,132 +175,24 @@ def create_midi(population, tngganada, nd_dasar, generation_id, inst):
         # allFiles.append(f"static/uploads/{time_folder}/{generation_id}/test"+ str(count) +'.mid')
     return allFiles
 
-def create_pdf(population, tngganada, nd_dasar, generation_id):
+def create_pdf(music21stream, tngganada, nd_dasar, generation_id, count):
     os.makedirs(f"static/uploads/{time_folder}/{generation_id}", exist_ok=True)
+    conv =  converter.subConverters.ConverterLilypond()
+
+    music21stream.keySignature = key.Key(nd_dasar, tngganada)
+    filepath = f"static/uploads/{time_folder}/{generation_id}/rank"+ count + "_" + nd_dasar + tngganada
+    respath = conv.write(music21stream, fmt = 'lilypond', fp=filepath, subformats = ['pdf'])
+    music21stream.pop(0)
+    return respath
+
+def create_multi_pdf(population, tngganada, nd_dasar, generation_id):
+    os.makedirs(f"static/uploads/{time_folder}/{generation_id}", exist_ok=True)
+    conv =  converter.subConverters.ConverterLilypond()
     for count, x in enumerate(population):
         x.keySignature = key.Key(nd_dasar, tngganada)
-        x.write('musicxml', fp=f"static/uploads/{time_folder}/{generation_id}/rank"+ str(count) + "_" + nd_dasar + tngganada)
+        filepath = f"static/uploads/{time_folder}/{generation_id}/rank"+ str(count) + "_" + nd_dasar + tngganada
+        conv.write(x, fmt = 'lilypond', fp=filepath, subformats = ['pdf'])
         x.pop(0)
     #s = corpus.parse(littleMelody)
     #littleMelody.show('midi')
     #littleMelody.clear()
-
-print("===MUSIC COMPOSITION GENERATION===")
-@click.command()
-@click.option("--juml-pop", default=4, prompt='Jumlah populasi / melodi', type=int)
-# @click.option("--juml-not", default=8, prompt='Jumlah not', type=int)
-# @click.option("--instrumen", default="Piano", prompt='Pilih alat musik', type=click.Choice(ALAT_MUSIK, case_sensitive=False))
-@click.option("--nd-dasar", default="C", prompt='Nada dasar', type=click.Choice(KEYS, case_sensitive=False))
-# @click.option("--tngganada", default='major', prompt='Tangga nada', type=click.Choice(SCALES, case_sensitive=False))
-@click.option("--num-mutations", default=2, prompt='Jumlah mutasi', type=int)
-@click.option("--mutation-probability", default=0.5, prompt='Probabilitas mutasi', type=float)
-def main(juml_pop: int, juml_not: int, instrumen: str, nd_dasar: str, tngganada: str, num_mutations: int, mutation_probability: float):
-
-    generation_id = 1
-
-    gen_list = []
-    sum_fitnesses = []
-
-    population_size = juml_pop
-
-    mtd_seleksi = "tournament"
-
-    if(tngganada == 'major'):
-        myscale = scale.MajorScale(nd_dasar)
-    elif(tngganada == 'minor'):
-        myscale = scale.MinorScale(nd_dasar)
-
-    population = [buat_chromosome(juml_not, myscale, population_size) for _ in range(population_size)]
-
-    lanjut = True
-    while lanjut:
-        gen_list.append(generation_id)
-        
-        population_fitness = [(chromosome, fitness(chromosome, instrumen)) for chromosome in population]
-        #population_fitness = [(chromosome, randrange(1,5)) for chromosome in population]
-
-        #sorted_population_fitness = sorted(population_fitness, key=lambda e: e[1], reverse=False)
-
-        population = [e[0] for e in population_fitness]
-
-        sum_fitnesses.append(sum([e[1] for e in population_fitness]))
-
-        for melodies in population_fitness:
-            print(str([str(p) for p in melodies[0].pitches]) + ' = ' + str(melodies[1]))
-
-        selectedParents = []
-        if(mtd_seleksi == "tournament"):
-            while int(len(population_fitness)) > 1:
-                a = tournament_selection(population_fitness)
-                print("winner : " + str(a))
-                b = population_fitness.pop(a)[0]
-                selectedParents.append(b)
-            selectedParents.append(population_fitness[0][0])
-
-        if(mtd_seleksi == "rank"):
-            for j in range(int(len(population))):
-                selectedParents.append(population[rank_selection(int(len(population)))])
-
-        print("urutan parent :")
-        for num in range(int(len(selectedParents))):
-            print([str(p) for p in selectedParents[num].pitches])
-        print("\n")
-
-        offsprings = []
-        for num in range(int(len(selectedParents))):
-            # checking condition
-            if num % 2 == 0:
-                # listIndex = []
-                # for i in range(1, int(len(selectedParents[num])-1)):
-                #     listIndex.append(i)
-                # index = sample(listIndex, k=2)
-                # while abs(index[0]-index[1]) <= 1:
-                #     index = sample(listIndex, k=2)
-                index = random.randint(1, int(len(selectedParents[num]))-1)
-                print(str([str(p) for p in selectedParents[num].pitches]) + " cross w/ \n" + str([str(p) for p in selectedParents[num+1].pitches]) + " , indeks perpotongan : " + str(index))
-                offspring_a, offspring_b = single_point_crossover(selectedParents[num], selectedParents[num+1], index)
-                offsprings.append(offspring_a)
-                offsprings.append(offspring_b)
-        
-        #offspring_a, offspring_b = single_point_crossover(selectedParents[0], selectedParents[1])
-        print('sp crossover results :')
-        for num in range(int(len(offsprings))):
-            print([str(p) for p in offsprings[num].pitches])
-
-        print('mutation results :')
-        for num in range(int(len(offsprings))):
-            offsprings[num] = mutation(offsprings[num], myscale, num=num_mutations, probability=mutation_probability)
-            print([str(p) for p in offsprings[num].pitches])
-
-        print("generasi " + str(generation_id) + " selesai!")
-        print("hasil 2 terbaik :")
-        
-        i = 1
-        for num in offsprings[:2]:
-            print("memainkan peringkat " + str(i) + " ...")
-            i +=1
-            play_sound(num, instrumen)
-
-        create_midi(offsprings, tngganada, nd_dasar, generation_id) if input("apakah mau simpan ke midi? [y/n]") == "y" else print("melodi tidak disimpan")
-        lanjut = input("lanjut? [y/n]") != "n"
-        population = offsprings
-        generation_id += 1
-    
-    if(input("ingin lihat dan simpan sheet melodi terbaik? [y/n]") == "y"):
-        show_score('musicxml.pdf', offsprings[0], tngganada, nd_dasar)
-        create_pdf(offsprings, tngganada, nd_dasar, generation_id-1)
-
-    if(generation_id > 2 and input("ingin lihat data? [y/n]") == "y"):
-        x = np.array(gen_list)
-        y = np.array(sum_fitnesses)
-
-        plt.plot(x, y)
-
-        plt.title("Data fitness di setiap generasi")
-        plt.xlabel("Generasi")
-        plt.ylabel("Sum Fitness")
-
-        plt.savefig('foo.png', bbox_inches='tight')
-
-if __name__ == '__main__':
-    main()

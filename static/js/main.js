@@ -37,19 +37,6 @@ function scrollHeader(){
 }
 window.addEventListener('scroll', scrollHeader)
 
-/*=============== SUBMIT FORM ===============*/
-form.addEventListener('submit', function(event) {
-    event.preventDefault();    // prevent page from refreshing
-    const formData = new FormData(form);  // grab the data inside the form fields
-    fetch('/evaluate', {   // assuming the backend is hosted on the same server
-        method: 'POST',
-        body: formData,
-    }).then(function(response) {
-        // do something with the response if needed.
-        // If you want the table to be built only after the backend handles the request and replies, call buildTable() here.
-    });
-});
-
 /*=============== NEW SWIPER ===============*/
 var swiper = new Swiper(".new-swiper", {
     spaceBetween: 24,

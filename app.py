@@ -1,16 +1,18 @@
 import random
-from flask import Flask, render_template, request, session, flash, redirect, url_for
+from flask import Flask, render_template, request, session, flash, redirect, url_for, send_from_directory, current_app, send_file
+from httplib2 import Response
 from matplotlib import pyplot as plt
 import matplotlib.ticker as mtick
 import numpy as np
-from musicgen import create_pdf, main, buat_chromosome, get_keyscale, create_midi, single_point_crossover, tournament_selection, mutation, noteLength
+from musicgen import create_pdf, buat_chromosome, get_keyscale, create_midi, single_point_crossover, tournament_selection, mutation
 import secrets
 import pyrebase
 import os
+import scipy.ndimage.filters as ndif
 from dotenv import load_dotenv
 
 app = Flask(__name__)
-
+app.secret_key = secrets.token_urlsafe(16)
 UPLOAD_FOLDER = 'uploads/'
  
 app.secret_key = secrets.token_urlsafe(16)
@@ -27,17 +29,12 @@ firebase_config = {
     'measurementId': os.getenv('FIREBASE_MEASUREMENT_ID')
 }
 
-firebase = pyrebase.initialize_app(firebaseConfig)
+firebase = pyrebase.initialize_app(firebase_config)
 db=firebase.database()
-
-ALLOWED_EXTENSIONS = set(['mid', 'midi', 'xml', 'pdf', 'mp3', 'wav', 'png', 'jpg', 'jpeg', 'gif'])
 
 user_dict = {}
 test = []
 sum_fitnesses = []
-
-def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 def silentremove(filename):
     try:
@@ -48,21 +45,6 @@ def silentremove(filename):
 @app.route('/')
 def index():
 	return render_template("index.html")
-
-@app.route('/login', methods = ['GET', 'POST'])
-def login():
-   error = None
-   
-   if request.method == 'POST':
-      if request.form['username'] != 'admin' or \
-         request.form['password'] != 'admin':
-         error = 'Invalid username or password. Please try again!'
-      else:
-         flash('You were successfully logged in')
-         return redirect(url_for('index'))
-   return render_template('login.html', error = error)
-
-
 
 @app.route('/', methods=['POST', 'GET'])
 def start():
@@ -75,6 +57,7 @@ def start():
 			# token = secrets.token_urlsafe(16)
 			ukey = str(request.form.get("Nickname"))
 			age=int(request.form.get("Age"))
+			email = str(request.form.get("email"))
 			experience = str(request.form.get("Experience"))
 
 			population_size=int(request.form.get("numMelodies"))
@@ -85,14 +68,13 @@ def start():
 			
 			population = [buat_chromosome(juml_not, scale, key, population_size) for _ in range(population_size)]
 			path = create_midi(population, scale, key, generation_num, instrument)
-			#create_pdf(population, scale, key, generation_num)
 			
 			silentremove('static/uploads/user_fig.jpg')
 
 			session['user'] = ukey
-			user_dict.update({ukey:{"db_data":[scale, key, generation_num, instrument, path, sum_fitnesses, age, experience], "population":population}})
+			user_dict.update({ukey:{"db_data":[scale, key, generation_num, instrument, path, sum_fitnesses, age, experience, email], "population":population}})
 			
-	return render_template("index.html", path=path, generation_num=user_dict[ukey]["db_data"][2])
+	return render_template("evaluate.html", path=path, generation_num=user_dict[ukey]["db_data"][2])
 
 @app.route('/evaluate', methods=['POST', 'GET'])
 def evaluate():
@@ -145,7 +127,7 @@ def evaluate():
 		user_dict[ukey]["population"] = offsprings
 		path = create_midi(user_dict[ukey]["population"], user_dict[ukey]["db_data"][0], user_dict[ukey]["db_data"][1], user_dict[ukey]["db_data"][2], user_dict[ukey]["db_data"][3])
 		user_dict[ukey]["db_data"][4] = path
-	return render_template("index.html", path=path, generation_num=user_dict[ukey]["db_data"][2])
+	return render_template("evaluate.html", path=path, generation_num=user_dict[ukey]["db_data"][2])
 
 @app.route('/download', methods=['POST', 'GET'])
 def download():
@@ -153,32 +135,22 @@ def download():
 		if 'user' in session:
 			ukey = session['user']
 
-		create_pdf(user_dict[ukey]["population"], user_dict[ukey]["db_data"][0], user_dict[ukey]["db_data"][1], user_dict[ukey]["db_data"][2])
+		
 		path = user_dict[ukey]["db_data"][4]
 
 		db.child("users").child(ukey).set(user_dict[ukey]["db_data"])
 
-		plt.style.use('seaborn')
-		fig, ax = plt.subplots()
-		population_num = user_dict[ukey]["db_data"][2]
+		create_figure(ukey)
 
-		sum_fit = []
-		for single_sum_fit in user_dict[ukey]["db_data"][5]:
-			single_sum_fit = single_sum_fit/(population_num*5)*100
-			sum_fit.append(single_sum_fit)
-		
-		gen_list = np.arange(1, len(sum_fit)+1)
-		ax.plot(gen_list, sum_fit, 's-', label=ukey)
-		ax.yaxis.set_major_formatter(mtick.PercentFormatter())
-		ax.xaxis.set_major_locator(mtick.MultipleLocator(1))
-		ax.legend(loc='best')
-		ax.set_title("Tingkat ketertarikan/fitness di setiap iterasi")
-		ax.set_xlabel("Iterasi / Generasi-1")
-		ax.set_ylabel("Presentase ketertarikan/fitness")
-		plt.tight_layout()
-		fig.savefig('static/uploads/user_fig.jpg', dpi=65)
+	return render_template("download.html", path=path, generation_num=user_dict[ukey]["db_data"][2], done=True)
 
-	return render_template("index.html", path=path, generation_num=user_dict[ukey]["db_data"][2], done=True)
+@app.route('/downloadpdf/<path:index_pop>', methods=['POST', 'GET'])
+def downloadpdf(index_pop):
+	if 'user' in session:
+		ukey = session['user']
+	pdfpath = create_pdf(user_dict[ukey]["population"][int(index_pop)-1], user_dict[ukey]["db_data"][0], user_dict[ukey]["db_data"][1], user_dict[ukey]["db_data"][2], index_pop)
+
+	return send_file(pdfpath, as_attachment=True)
 
 @app.route('/datadmin', methods=['POST', 'GET'])
 def data():
@@ -205,19 +177,14 @@ def data():
 		x_all.append(gen_list)
 		y_all.append(sum_fit)
 
-		ax.plot(gen_list, sum_fit, 's-', label='User '+str(user_count))
+		ax.plot(gen_list, sum_fit, 'o-', label='User '+str(user_count))
 
 		ax_single.cla()
     
 		ax_single.plot(gen_list, sum_fit, 's-', label=user.key())
-		ax_single.yaxis.set_major_formatter(mtick.PercentFormatter())
-		ax_single.xaxis.set_major_locator(mtick.MultipleLocator(1))
-		ax_single.set_title("Tingkat ketertarikan/fitness di setiap iterasi")
-		ax_single.set_xlabel("Iterasi / Generasi-1")
-		ax_single.set_ylabel("Presentase ketertarikan/fitness")
-		fig_single.savefig('static/uploads/fig'+str(user_count)+'.jpg', dpi=75)
+		save_figure(ax_single, fig_single, str(user_count))
 		
-		users_data.append([user.key(), user.val()[0], user.val()[1], user.val()[2], user.val()[3], user.val()[6], user.val()[7]])
+		users_data.append([user.key(), user.val()[0], user.val()[1], user.val()[2], user.val()[3], user.val()[6], user.val()[7], user.val()[8]])
 
 	for i in x_all:
 		if highest < max(i):
@@ -225,8 +192,32 @@ def data():
 			mean_x_axis = i
 	ys_interp = [np.interp(mean_x_axis, x_all[i], y_all[i]) for i in range(len(x_all))]
 	mean_y_axis = np.mean(ys_interp, axis=0)
-	ax.plot(mean_x_axis, mean_y_axis, '--', label='Extrapolated Mean')
+	ax.plot(mean_x_axis, mean_y_axis, '--', label='Mean')
+	save_figure(ax, fig, 'sum')
 
+	ax_single.cla()
+	y_avg = [np.mean(mean_y_axis)] * len(mean_x_axis)
+	ax_single.plot(mean_x_axis, mean_y_axis, '--', label='Mean')
+	ax_single.plot(mean_x_axis, y_avg, label='Avg Mean')
+	save_figure(ax_single, fig_single, 'avg')
+	return render_template("data.html", users_data=users_data)
+
+def create_figure(ukey):
+	population_num = user_dict[ukey]["db_data"][2]
+
+	plt.style.use('seaborn')
+	fig, ax = plt.subplots()
+
+	sum_fit = []
+	for single_sum_fit in user_dict[ukey]["db_data"][5]:
+		single_sum_fit = single_sum_fit/(population_num*5)*100
+		sum_fit.append(single_sum_fit)
+	
+	gen_list = np.arange(1, len(sum_fit)+1)
+	ax.plot(gen_list, sum_fit, 'o-', label=ukey)
+	save_figure(ax, fig, 'single')
+
+def save_figure(ax, fig, pathid):
 	ax.yaxis.set_major_formatter(mtick.PercentFormatter())
 	ax.xaxis.set_major_locator(mtick.MultipleLocator(1))
 	ax.legend(loc='best')
@@ -234,9 +225,8 @@ def data():
 	ax.set_xlabel("Iterasi / Generasi-1")
 	ax.set_ylabel("Presentase ketertarikan/fitness")
 	plt.tight_layout()
-	fig.savefig('static/uploads/last_fig.jpg', dpi=75)
+	fig.savefig('static/uploads/fig_' + pathid + '.jpg', dpi=65)
 
-	return render_template("data.html", users_data=users_data)
 
 # main driver function
 # if __name__ == '__main__':

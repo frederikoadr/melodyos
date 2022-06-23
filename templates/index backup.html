@@ -5,16 +5,16 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
         <!--=============== FAVICON ===============-->
-        <link rel="shortcut icon" href="assets/img/favicon.png" type="image/x-icon">
+        <link rel="shortcut icon" href="static/img/applogo.png" type="image/x-icon">
 
         <!--=============== BOXICONS ===============-->
         <link rel="stylesheet" href="https://unpkg.com/boxicons@latest/css/boxicons.min.css">
 
         <!--=============== SWIPER CSS ===============--> 
-        <link rel="stylesheet" href="assets/css/swiper-bundle.min.css">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/swiper-bundle.min.css') }}">
 
         <!--=============== CSS ===============-->
-        <link rel="stylesheet" href="assets/css/styles.css">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 
         <title>Melodyos</title>
     </head>
@@ -23,7 +23,7 @@
         <header class="header" id="header">
             <nav class="nav container">
                 <a href="#" class="nav__logo">
-                    <img src="assets/img/mlogo.png" alt="" class="nav__logo-img">
+                    <img src="static/img/applogo.png" alt="" class="nav__logo-img">
                     Melodyos
                 </a>
                 <div class="nav__menu" id="nav-menu">
@@ -44,7 +44,7 @@
                     <div class="nav__close" id="nav-close">
                         <i class='bx bx-x'></i>
                     </div>
-                    <!-- <img src="assets/img/nav-light.png" alt="" class="nav__img"> -->
+                    <!-- <img src="static/img/nav-light.png" alt="" class="nav__img"> -->
                 </div>
 
                 <div class="nav__btns">
@@ -62,7 +62,7 @@
             <!--==================== HOME ====================-->
             <section class="home" id="home">
                 <div class="home__container grid">
-                    <img src="assets/img/mlogo.png" alt="" class="home__img">
+                    <img src="static/img/applogo.png" alt="" class="home__img">
                     <div class="home__data">
                         <h1 class="home__title">
                             Melodyos
@@ -71,12 +71,12 @@
                             melodyos is a tool that can create musical ideas in the form of short melodic phrases based on collaboration between genetic algorithms and users without the need to understand music theory
                             <!-- to help the process of exploring ideas in making musical works. -->
                         </p>
-                        <a href="#criteria" class="button">Get Started</a>
+                        <a href="#user" class="button">Get Started</a>
                     </div>
                 </div>
             </section>
 
-            <!--==================== GIVING ====================-->
+            <!--==================== Glossary ====================-->
             <section class="giving section container">
                 <h2 class="section__title">
                     Music Elements Glossary
@@ -85,26 +85,49 @@
                 <div class="giving__container grid">
                     <!-- <input type="text"> -->
                     <div class="giving__content">
-                        <img src="assets/img/music-solid.png" alt="" class="giving__img">
+                        <img src="static/img/music-solid.png" alt="" class="giving__img">
                         <h3 class="giving__title">Musical Note</h3>
-                        <p class="giving__description">{desc}</p>
+                        <p class="giving__description">a symbol denoting a musical sound. Notes can represent the pitch and duration of a sound in musical notation.</p>
                     </div>
 
                     <div class="giving__content">
-                        <img src="assets/img/music-solid.png" alt="" class="giving__img">
+                        <img src="static/img/music-solid.png" alt="" class="giving__img">
                         <h3 class="giving__title">Melody</h3>
-                        <p class="giving__description">{desc}</p>
+                        <p class="giving__description">A succession of notes, varying in pitch, which have an organized and recognizable shape. Melody also have scale.</p>
                     </div>
 
                     <div class="giving__content">
-                        <img src="assets/img/music-solid.png" alt="" class="giving__img">
+                        <img src="static/img/music-solid.png" alt="" class="giving__img">
                         <h3 class="giving__title">Music Scale</h3>
-                        <p class="giving__description">{desc}</p>
+                        <p class="giving__description">formally recognized as systems of tones from which melody can be built and contribute to its overall character.</p>
                     </div>
                 </div>
             </section>
 
-            <!--==================== CELEBRATE ====================-->
+            <!--==================== User ====================-->
+            
+            <form action="#gift" method="post">
+            <section class="userinfo section container" id="user">
+                <h2 class="section__title">
+                    Tell me about you
+                </h2>
+                <p class="section__subtitle">*for research purposes</p>
+
+                <div class="userinfo__data">
+                    <label for="not">Nickname</label>
+                    <input type="text" name="Nickname" value="Guest" maxlength="20" required>
+                    <label for="not">Age</label>
+                    <input type="number" name="Age" value="18" min="9" max="99" required>
+                    <label for="not">Experience in music production</label>
+                    <select name="Experience" id="Experience">
+                        <option value="beginner">I'm a beginner in making music</option>
+                        <option value="experienced">I have earned income from making music</option>
+                    </select>
+                    <a href="#criteria" class="button">Next</a>
+                </div>
+            </section>
+
+            <!--==================== Select ====================-->
             <section class="celebrate section container" id="criteria">
                 <div class="celebrate__container grid">
                     <div class="celebrate__data">
@@ -116,147 +139,175 @@
                         </p>
                     </div>
                     <div class="celebrate__data">
-                        <form action="#gift" method="post">
-                            <label for="melodi">Number of melodies</label>
+                        <!-- <form action="#gift" method="post"> -->
+                            <label for="melodi">Number of melodic variants</label>
                             <input type="number" name="numMelodies" value="4" min="4" max="12" required>
-                            <label for="not">Number of notes</label>
+                            <label for="not">Number of notes on melody</label>
                             <input type="number" name="numNotes" value="8" min="8" max="16" required>
                             <label for="not">Scale (Tangga Nada)</label>
                             <select name="scale" id="scale">
-                                <option value="major">Major</option>
-                                <option value="minor">Minor</option>
+                                <option value="major">Major/Ionian</option>
+                                <option value="minor">Minor/Aeolian</option>
+                                <option value="dorian">Dorian</option>
+                                <option value="phrygian">Phrygian</option>
+                                <option value="lydian">Lydian</option>
+                                <option value="mixolydian">Mixolydian</option>
+                                <option value="locrian">Locrian</option>
                             </select>
                             <label for="not">Key Signature (Nada Dasar)</label>
                             <select name="key" id="key">
                                 <option value="C">C</option>
                                 <option value="D">D</option>
+                                <option value="E">E</option>
+                                <option value="F">F</option>
+                                <option value="G">G</option>
+                                <option value="A">A</option>
+                                <option value="B">B</option>
+                                <option value="Db">D&#9837;</option>
+                                <option value="Eb">E&#9837;</option>
+                                <option value="Gb">G&#9837;/F&sharp;</option>
+                                <option value="Ab">A&#9837;</option>
+                                <option value="Bb">B&#9837;</option>
                             </select>
                             <label for="not">Instrument</label>
                             <select name="inst" id="inst">
                                 <option value="piano">Piano</option>
                                 <option value="guitar">Guitar</option>
                                 <option value="violin">Violin</option>
+                                <option value="flute">Flute</option>
+                                <option value="trumpet">Trumpet</option>
+                                <option value="saxophone">Violin</option>
+                                <option value="marimba">Marimba</option>
                             </select>
-                            <input type="hidden" name="step" value="initiate">
-                            <button type="submit" value="submit" class="button">Start </button>
+                            <button type="submit" name="step" value="initiate" class="button">Start </button>
                         </form>
                     </div>
                 </div>
             </section>
 
-            <!--==================== GIFT ====================-->
+            <!--==================== RATE ====================-->
             <section class="gift section container" id="gift">
                 <h2 class="section__title">
                     Rate Melodies
                 </h2>
-                
-                <div class="gift__container grid">
-                    <article class="gift__card">
-                        
-                        <h3>Melody 1</h3>
-                        <div class="section3">
-                            <midi-player
-                            src="test0.mid"
-                            sound-font visualizer=".section3 midi-visualizer">
-                            </midi-player>
-                            <midi-visualizer
-                            src="test0.mid">
-                            </midi-visualizer>
+                <p class="section__subtitle">*please rate at least up to 5 generations, thank you :)</p>
+                {% if path %}
+                    <form action="/evaluate#gift" method="post">
+                    <div class="gift__container grid">
+                    <h3>Generation {{generation_num}}</h3>
+                        {% for result in path %}
+                        <article class="gift__card">
+                            <h3>Melody rank {{loop.index}}</h3>
+                            <div id="midi{{loop.index}}" class="section3">
+                                <midi-player
+                                    src={{result}}.mid
+                                    sound-font="https://storage.googleapis.com/magentadata/js/soundfonts/sgm_plus" visualizer="#midi{{loop.index}} midi-visualizer">
+                                </midi-player>				
+                                <midi-visualizer type="piano-roll"></midi-visualizer>
+                                <div class="button rate__button">
+                                    <div class="star-rating">
+                                        <input type="radio" id="5-stars{{loop.index}}" name="rating{{loop.index}}" value="5" />
+                                        <label for="5-stars{{loop.index}}" class="star"><i class='bx bxs-star'></i></label>
+                                        <input type="radio" id="4-stars{{loop.index}}" name="rating{{loop.index}}" value="4" />
+                                        <label for="4-stars{{loop.index}}" class="star"><i class='bx bxs-star'></i></label>
+                                        <input type="radio" id="3-stars{{loop.index}}" name="rating{{loop.index}}" value="3" />
+                                        <label for="3-stars{{loop.index}}" class="star"><i class='bx bxs-star'></i></label>
+                                        <input type="radio" id="2-stars{{loop.index}}" name="rating{{loop.index}}" value="2" />
+                                        <label for="2-stars{{loop.index}}" class="star"><i class='bx bxs-star'></i></label>
+                                        <input type="radio" id="1-star{{loop.index}}" name="rating{{loop.index}}" value="1" checked/>
+                                        <label for="1-star{{loop.index}}" class="star"><i class='bx bxs-star'></i></label>
+                                      </div>
+                                </div>								  
+                            </div>
+                        </article>
+                        {% endfor %}
+                        <div class="content">
+                            <p>the melody can be improved again by continuing to rate or evaluate</p>
+                            <input type="hidden" name="step" value="evaluate">
+                            <input type="hidden" name="numMelodies" value={{path|count}}>
+                            <button type="submit" value="submit" class="button">Continue</button>
+                            </form>
+                            {% if generation_num > 4 %}
+                            <form action="/download#new" method="post">
+                            <p>or if its enough, you can start downloading the results</p>
+                            <input type="hidden" name="pathMelodies" value={{path|count}}>
+                            <button type="submit" name="step" value="download" class="button">Download</button>
+                            </form>
+                            {% endif %}
+                            <!-- <p>or restart from beginnig</p>
+                            <a href="#user" class="button">Restart</a> -->
                         </div>
-                        <button class="button rate__button">
-                            <div class="star-rating">
-                                <input type="radio" id="5-stars" name="rating" value="5" />
-                                <label for="5-stars" class="star"><i class='bx bxs-star'></i></label>
-                                <input type="radio" id="4-stars" name="rating" value="4" />
-                                <label for="4-stars" class="star"><i class='bx bxs-star'></i></label>
-                                <input type="radio" id="3-stars" name="rating" value="3" />
-                                <label for="3-stars" class="star"><i class='bx bxs-star'></i></label>
-                                <input type="radio" id="2-stars" name="rating" value="2" />
-                                <label for="2-stars" class="star"><i class='bx bxs-star'></i></label>
-                                <input type="radio" id="1-star" name="rating" value="1" checked/>
-                                <label for="1-star" class="star"><i class='bx bxs-star'></i></label>
-                              </div>
-                        </button>
-                    </article>
+                    {% endif %}
                 </div>
             </section>
 
-            <!--==================== NEW ====================-->
+            {% if done %}
+            <!--==================== DOWNLOAD ====================-->
             <section class="new section container" id="new">
                 <h2 class="section__title">
                     Download Results
                 </h2>
 
                 <div class="new__container">
+                    {% if path %}
+                    <h3>Generation {{generation_num}}</h3>
                     <div class="swiper new-swiper">
                         <div class="swiper-wrapper">
+                            {% for result in path %}
                             <article class="new__card swiper-slide">
                                 <div class="new__overlay"></div>
                                 
-                                <h3>Melody 1</h3>
-                                <button class="button download__button"><i class='bx bx-download'></i> .MIDI</button>
-                                <button class="button download__button"><i class='bx bx-download'></i> .PDF</button>
-                                <button class="button download__button"><i class='bx bx-download'></i> .XML</button>
-                                <div class="section3">
+                                <h3>Melody rank {{loop.index}}</h3>
+                                <a href="{{result}}.mid" class="button download__button"><i class='bx bx-download'></i> .MIDI</a>
+                                <!-- <a href="{{result}}.pdf" class="button download__button"><i class='bx bx-download'></i> .PDF</a> -->
+                                <a href="{{result}}.musicxml" class="button download__button"><i class='bx bx-download'></i> .XML</a>
+                                <div id="midi{{loop.index}}" class="section3">
                                     <midi-player
-                                    src="test0.mid"
-                                    sound-font visualizer=".section3 midi-visualizer">
-                                    </midi-player>
-                                    <midi-visualizer
-                                    src="test0.mid">
-                                    </midi-visualizer>
-                                </div>                           
+                                        src={{result}}.mid
+                                        sound-font="https://storage.googleapis.com/magentadata/js/soundfonts/sgm_plus" visualizer="#midi{{loop.index}} midi-visualizer">
+                                    </midi-player>				
+                                    <midi-visualizer type="piano-roll"></midi-visualizer>							  
+                                </div>                        
                             </article>
-                            <article class="new__card swiper-slide">
-                                <div class="new__overlay"></div>
-
-                                <img src="assets/img/new2.png" alt="" class="new__img">
-                                <h3 class="new__price">251$</h3>
-                                <span class="new__title">bruh</span>
-                                
-                                <button class="button new__button">
-                                    <i class='bx bx-star new__icon'></i>
-                                </button>
-                            </article>
-                            <article class="new__card swiper-slide">
-                                <div class="new__overlay"></div>
-
-                                <img src="assets/img/new3.png" alt="" class="new__img">
-                                <h3 class="new__price">95$</h3>
-                                <span class="new__title">lormmm</span>
-                                
-                                <button class="button new__button">
-                                    <i class='bx bx-star new__icon'></i>
-                                </button>
-                            </article>
-                            <article class="new__card swiper-slide">
-                                <div class="new__overlay"></div>
-
-                                <img src="assets/img/new4.png" alt="" class="new__img">
-                                <h3 class="new__price">231$</h3>
-                                <span class="new__title">circle of life</span>
-                                
-                                <button class="button new__button">
-                                    <i class='bx bx-star new__icon'></i>
-                                </button>
-                            </article>
+                            {% endfor %}
                         </div>
 
                         <div class="swiper-pagination"></div>
                     </div>
+                    {% endif %}
                 </div>
             </section>
+
+            <!--==================== STATS ====================-->
+            <section class="celebrate section container" id="criteria">
+                <div class="celebrate__container grid">
+                    <div class="celebrate__data">
+                        <h2 class="section__title celebrate__title">
+                            Stats
+                        </h2>
+                        <p class="celebrate__description">
+                            the following is the percentage of fitness per iteration to see your level of interest obtained from the following function :
+                        </p>
+                        <p>\(\sum _{i=1}^{n} x_{i} \div ( n\times 5) \times 100\%\)</p>
+                        <p>\(n\) = number of melodic variants</p>
+                    </div>
+                    <div class="celebrate__data">
+                        <img src="static/uploads/user_fig.jpg" alt="gambar tingkat ketertarikan di setiap iterasi">
+                    </div>
+                </div>
+            </section>
+            {%endif%}
 
             <!--==================== MESSAGE ====================-->
             <section class="message section container">
                 <div class="message__container grid">
                     <form action="" class="message__form">
-                        <h2 class="message__title">Meet the Dev</h2>
+                        <h2 class="message__title">Developed in</h2>
                         <!-- <input type="email" placeholder="Write your message" class="message__input">
                         <button class="button message__button">Send Message</button> -->
                     </form>
 
-                    <img src="assets/img/KTM.jpg" alt="" class="message__img">
+                    <img src="static/img/Logo_PENS.png" alt="" class="message__img">
                 </div>
             </section>
         </main>
@@ -266,7 +317,7 @@
             <div class="footer__container container grid">
                 <div>
                     <a href="#" class="footer__logo">
-                        <!-- <img src="assets/img/logo.png" alt="" class="footer__logo-img">  -->
+                        <!-- <img src="static/img/logo.png" alt="" class="footer__logo-img">  -->
                         Melodyos
                     </a>
 
@@ -311,12 +362,12 @@
                     <h3 class="footer__title">Available On</h3>
 
                     <div class="footer__aviables">
-                        <img src="assets/img/discord.png" alt="" class="footer__aviable-img">
+                        <img src="static/img/discord.png" alt="" class="footer__aviable-img">
                     </div>
                 </div>
 
-                <img src="assets/img/footer1.png" alt="" class="footer__img1">
-                <img src="assets/img/footer2.png" alt="" class="footer__img2"> -->
+                <img src="static/img/footer1.png" alt="" class="footer__img1">
+                <img src="static/img/footer2.png" alt="" class="footer__img2"> -->
             </div>
 
             <span class="footer__copy">Made with 💙 by Frederiko Adrian</span>
@@ -328,15 +379,19 @@
         </a>
 
         <!--=============== SCROLL REVEAL ===============-->
-        <script src="assets/js/scrollreveal.min.js"></script>
+        <script src="{{ url_for('static', filename='js/scrollreveal.min.js') }}"></script>
 
         <!--=============== SWIPER JS ===============-->
-        <script src="assets/js/swiper-bundle.min.js"></script>
+        <script src="{{ url_for('static', filename='js/swiper-bundle.min.js') }}"></script>
 
         <!--=============== MAIN JS ===============-->
-        <script src="assets/js/main.js"></script>
+        <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 
         <!--=============== MIDI JS ===============-->
         <script src="https://cdn.jsdelivr.net/combine/npm/tone@14.7.58,npm/@magenta/music@1.23.1/es6/core.js,npm/focus-visible@5,npm/html-midi-player@1.4.0"></script>
+
+        <!--=============== MATHJAX ===============-->
+        <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+        <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     </body>
 </html>

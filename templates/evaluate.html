@@ -1,0 +1,264 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!--=============== FAVICON ===============-->
+    <link rel="shortcut icon" href="static/img/applogo.png" type="image/x-icon">
+
+    <!--=============== BOXICONS ===============-->
+    <link rel="stylesheet" href="https://unpkg.com/boxicons@latest/css/boxicons.min.css">
+
+    <!--=============== SWIPER CSS ===============--> 
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/swiper-bundle.min.css') }}">
+
+    <!--=============== CSS ===============-->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+
+    <title>Melodyos</title>
+</head>
+<body>
+    <!--==================== HEADER ====================-->
+    <header class="header" id="header">
+        <nav class="nav container">
+            <a href="#" class="nav__logo">
+                <img src="static/img/applogo.png" alt="" class="nav__logo-img">
+                Melodyos
+            </a>
+            <div class="nav__menu" id="nav-menu">
+                <ul class="nav__list">
+                    <li class="nav__item">
+                        <a href="#gift" class="nav__link">Rate</a>
+                    </li>
+                </ul>
+                <div class="nav__close" id="nav-close">
+                    <i class='bx bx-x'></i>
+                </div>
+                <!-- <img src="static/img/nav-light.png" alt="" class="nav__img"> -->
+            </div>
+
+            <div class="nav__btns">
+                <i class='bx bx-moon change-theme' id="theme-button"></i>
+
+                <div class="nav__toggle" id="nav-toggle">
+                    <i class='bx bx-grid-alt'></i>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!--==================== MAIN ====================-->
+    <main class="main">
+        <!--==================== RATE ====================-->
+        <section class="gift section container" id="gift">
+            <h2 class="section__title">
+                Rate Melodies
+            </h2>
+            <p class="section__subtitle">*please rate each melody then click continue for at least 5 generations, then click download <br> the melody will 'evolve' according to your liking</p>
+            <p class="section__subtitle">*silakan rate tiap melodi lalu klik continue minimal 5 generasi, lalu klik download</p>
+            {% if path %}
+                <form action="/evaluate#gift" method="post">
+                <div class="gift__container grid">
+                <h3>Generation {{generation_num}}</h3>
+                    {% for result in path %}
+                    <article class="gift__card">
+                        <h3>Melody rank {{loop.index}}</h3>
+                        <div id="midi{{loop.index}}" class="section3">
+                            <midi-player
+                                src={{result}}.mid
+                                sound-font="https://storage.googleapis.com/magentadata/js/soundfonts/sgm_plus" visualizer="#midi{{loop.index}} midi-visualizer">
+                            </midi-player>				
+                            <midi-visualizer type="piano-roll"></midi-visualizer>
+                            <div class="button rate__button">
+                                <div class="star-rating">
+                                    <input type="radio" id="5-stars{{loop.index}}" name="rating{{loop.index}}" value="5" />
+                                    <label for="5-stars{{loop.index}}" class="star"><i class='bx bxs-star'></i></label>
+                                    <input type="radio" id="4-stars{{loop.index}}" name="rating{{loop.index}}" value="4" />
+                                    <label for="4-stars{{loop.index}}" class="star"><i class='bx bxs-star'></i></label>
+                                    <input type="radio" id="3-stars{{loop.index}}" name="rating{{loop.index}}" value="3" />
+                                    <label for="3-stars{{loop.index}}" class="star"><i class='bx bxs-star'></i></label>
+                                    <input type="radio" id="2-stars{{loop.index}}" name="rating{{loop.index}}" value="2" />
+                                    <label for="2-stars{{loop.index}}" class="star"><i class='bx bxs-star'></i></label>
+                                    <input type="radio" id="1-star{{loop.index}}" name="rating{{loop.index}}" value="1" checked/>
+                                    <label for="1-star{{loop.index}}" class="star"><i class='bx bxs-star'></i></label>
+                                  </div>
+                            </div>								  
+                        </div>
+                    </article>
+                    {% endfor %}
+                    <div class="content">
+                        <p>the melody can be improved again by continuously rating or evaluating</p>
+                        <input type="hidden" name="step" value="evaluate">
+                        <input type="hidden" name="numMelodies" value={{path|count}}>
+                        <button type="submit" value="submit" class="button">Continue</button>
+                        </form>
+                        {% if generation_num > 4 %}
+                        <form action="/download#new" method="post">
+                        <p>or if that's enough, you can start downloading the results</p>
+                        <input type="hidden" name="pathMelodies" value={{path|count}}>
+                        <button type="submit" name="step" value="download" class="button">Download</button>
+                        </form>
+                        {% endif %}
+                        <!-- <p>or restart from beginnig</p>
+                        <a href="#user" class="button">Restart</a> -->
+                    </div>
+                {% endif %}
+            </div>
+        </section>
+
+        {% if done %}
+        <!--==================== DOWNLOAD ====================-->
+        <section class="new section container" id="new">
+            <h2 class="section__title">
+                Download Results
+            </h2>
+
+            <div class="new__container">
+                {% if path %}
+                <h3>Generation {{generation_num}}</h3>
+                <div class="swiper new-swiper">
+                    <div class="swiper-wrapper">
+                        {% for result in path %}
+                        <article class="new__card swiper-slide">
+                            <div class="new__overlay"></div>
+                            
+                            <h3>Melody rank {{loop.index}}</h3>
+                            <a href="{{result}}.mid" class="button download__button"><i class='bx bx-download'></i> .MIDI</a>
+                            <!-- <a href="{{result}}.pdf" class="button download__button"><i class='bx bx-download'></i> .PDF</a> -->
+                            <a href="{{result}}.musicxml" class="button download__button"><i class='bx bx-download'></i> .XML</a>
+                            <div id="midi{{loop.index}}" class="section3">
+                                <midi-player
+                                    src={{result}}.mid
+                                    sound-font="https://storage.googleapis.com/magentadata/js/soundfonts/sgm_plus" visualizer="#midi{{loop.index}} midi-visualizer">
+                                </midi-player>				
+                                <midi-visualizer type="piano-roll"></midi-visualizer>							  
+                            </div>                        
+                        </article>
+                        {% endfor %}
+                    </div>
+
+                    <div class="swiper-pagination"></div>
+                </div>
+                {% endif %}
+            </div>
+        </section>
+
+        <!--==================== STATS ====================-->
+        <section class="celebrate section container" id="criteria">
+            <div class="celebrate__container grid">
+                <div class="celebrate__data">
+                    <h2 class="section__title celebrate__title">
+                        Stats
+                    </h2>
+                    <p class="celebrate__description">
+                        the following is the percentage of fitness per iteration to see your level of interest obtained from the following function :
+                    </p>
+                    <p>\(\sum _{i=1}^{n} x_{i} \div ( n\times 5) \times 100\%\)</p>
+                    <p>\(n\) = number of melodic variants</p>
+                </div>
+                <div class="celebrate__data">
+                    <img src="static/uploads/user_fig.jpg" alt="gambar tingkat ketertarikan di setiap iterasi">
+                </div>
+            </div>
+        </section>
+        {%endif%}
+
+        <!--==================== MESSAGE ====================-->
+        <section class="message section container">
+            <div class="message__container grid">
+                <form action="" class="message__form">
+                    <h2 class="message__title">Developed in</h2>
+                    <!-- <input type="email" placeholder="Write your message" class="message__input">
+                    <button class="button message__button">Send Message</button> -->
+                </form>
+
+                <img src="static/img/Logo_PENS.png" alt="" class="message__img">
+            </div>
+        </section>
+    </main>
+
+    <!--==================== FOOTER ====================-->
+    <footer class="footer section">
+        <div class="footer__container container grid">
+            <div>
+                <a href="#" class="footer__logo">
+                    <!-- <img src="static/img/logo.png" alt="" class="footer__logo-img">  -->
+                    Melodyos
+                </a>
+
+                <p class="footer__description">
+                    Music Generation <br> with Genetic Algorithm
+                </p>
+            <!-- </div>
+
+            <div>
+                <h3 class="footer__title">Our Services</h3>
+
+                <ul class="footer__links">
+                    <li>
+                        <a href="#" class="footer__link">Pricing</a>
+                    </li>
+                    <li>
+                        <a href="#" class="footer__link">Discounts</a>
+                    </li>
+                    <li>
+                        <a href="#" class="footer__link">Shipping mode</a>
+                    </li>
+                </ul>
+            </div>
+
+            <div>
+                <h3 class="footer__title">Support</h3>
+
+                <ul class="footer__links">
+                    <li>
+                        <a href="#" class="footer__link">FAQs</a>
+                    </li>
+                    <li>
+                        <a href="#" class="footer__link">Support center</a>
+                    </li>
+                    <li>
+                        <a href="#" class="footer__link">Contact Us</a>
+                    </li>
+                </ul>
+            </div>
+
+            <div>
+                <h3 class="footer__title">Available On</h3>
+
+                <div class="footer__aviables">
+                    <img src="static/img/discord.png" alt="" class="footer__aviable-img">
+                </div>
+            </div>
+
+            <img src="static/img/footer1.png" alt="" class="footer__img1">
+            <img src="static/img/footer2.png" alt="" class="footer__img2"> -->
+        </div>
+
+        <span class="footer__copy">Made with 💙 by Frederiko Adrian</span>
+    </footer>
+
+    <!--=============== SCROLL UP ===============-->
+    <a href="#home" class="scrollup" id="scroll-up">
+        <i class='bx bx-chevron-up scrollup__icon'></i>
+    </a>
+
+    <!--=============== SCROLL REVEAL ===============-->
+    <script src="{{ url_for('static', filename='js/scrollreveal.min.js') }}"></script>
+
+    <!--=============== SWIPER JS ===============-->
+    <script src="{{ url_for('static', filename='js/swiper-bundle.min.js') }}"></script>
+
+    <!--=============== MAIN JS ===============-->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+
+    <!--=============== MIDI JS ===============-->
+    <script src="https://cdn.jsdelivr.net/combine/npm/tone@14.7.58,npm/@magenta/music@1.23.1/es6/core.js,npm/focus-visible@5,npm/html-midi-player@1.4.0"></script>
+
+    <!--=============== MATHJAX ===============-->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</body>
+</html>
