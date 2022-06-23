@@ -8,7 +8,6 @@ from musicgen import create_pdf, buat_chromosome, get_keyscale, create_midi, sin
 import secrets
 import pyrebase
 import os
-import scipy.ndimage.filters as ndif
 
 app = Flask(__name__)
 app.secret_key = secrets.token_urlsafe(16)
