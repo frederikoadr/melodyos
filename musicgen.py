@@ -11,8 +11,7 @@ import click
 KEYS = ["C", "C#", "Db", "D", "D#", "Eb", "E", "F", "F#", "Gb", "G", "G#", "Ab", "A", "A#", "Bb", "B"]
 noteLength = [.5, 1, 2]
 
-us = environment.UserSettings()
-us['lilypondPath'] = 'LilyPond/usr/bin/lilypond.exe'
+
 
 Chromosome = stream.Stream()
 time_folder = str(int(datetime.now().timestamp()))
@@ -187,6 +186,8 @@ def create_pdf(music21stream, tngganada, nd_dasar, generation_id, count):
 
 def create_multi_pdf(population, tngganada, nd_dasar, generation_id):
     os.makedirs(f"static/uploads/{time_folder}/{generation_id}", exist_ok=True)
+    us = environment.UserSettings()
+    us['lilypondPath'] = 'LilyPond/usr/bin/lilypond.exe'
     conv =  converter.subConverters.ConverterLilypond()
     for count, x in enumerate(population):
         x.keySignature = key.Key(nd_dasar, tngganada)
