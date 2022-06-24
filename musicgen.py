@@ -177,7 +177,8 @@ def create_midi(population, tngganada, nd_dasar, generation_id, inst):
 def create_pdf(music21stream, tngganada, nd_dasar, generation_id, count):
     os.makedirs(f"static/uploads/{time_folder}/{generation_id}", exist_ok=True)
     conv =  converter.subConverters.ConverterLilypond()
-
+    us = environment.UserSettings()
+    us['lilypondPath'] = 'LilyPond/usr/bin/lilypond.exe'
     music21stream.keySignature = key.Key(nd_dasar, tngganada)
     filepath = f"static/uploads/{time_folder}/{generation_id}/rank"+ count + "_" + nd_dasar + tngganada
     respath = conv.write(music21stream, fmt = 'lilypond', fp=filepath, subformats = ['pdf'])
@@ -186,8 +187,6 @@ def create_pdf(music21stream, tngganada, nd_dasar, generation_id, count):
 
 def create_multi_pdf(population, tngganada, nd_dasar, generation_id):
     os.makedirs(f"static/uploads/{time_folder}/{generation_id}", exist_ok=True)
-    us = environment.UserSettings()
-    us['lilypondPath'] = 'LilyPond/usr/bin/lilypond.exe'
     conv =  converter.subConverters.ConverterLilypond()
     for count, x in enumerate(population):
         x.keySignature = key.Key(nd_dasar, tngganada)
