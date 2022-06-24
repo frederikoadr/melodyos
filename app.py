@@ -11,7 +11,8 @@ import os
 from dotenv import load_dotenv
 
 app = Flask(__name__)
-app.secret_key = secrets.token_urlsafe(16)
+app.secret_key = 'SECRET_KEY' #secrets.token_urlsafe(16)
+app.config['SESSION_COOKIE_NAME'] = "my_session"
 UPLOAD_FOLDER = 'uploads/'
  firebase_config = {
     'apiKey': os.getenv('FIREBASE_API_KEY'),
