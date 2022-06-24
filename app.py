@@ -136,7 +136,7 @@ def download():
 
 		create_figure(ukey)
 
-	return render_template("download.html", path=path, generation_num=user_dict[ukey]["db_data"][2], done=True)
+	return render_template("download.html", path=path, user_dict=user_dict[ukey]["db_data"], done=True)
 
 @app.route('/downloadpdf/<path:index_pop>', methods=['POST', 'GET'])
 def downloadpdf(index_pop):
