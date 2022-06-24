@@ -60,7 +60,10 @@
 
             <div class="new__container">
                 {% if path %}
-                <h3>Generation {{generation_num}}</h3>
+                <h3>Generation {{user_dict.2}}</h3>
+                <p>Instrument : {{user_dict.3}}</p>
+                <p>Scale : {{user_dict.0}}</p>
+                <p>Key : {{user_dict.1}}</p>
                 <div class="swiper new-swiper">
                     <div class="swiper-wrapper">
                         {% for result in path %}
