@@ -115,10 +115,13 @@ def mutation(melody: Chromosome, scale, key, num: int, probability: float) -> Ch
     for _ in range(num):
         if (random.random() < probability):
             index = random.randint(0, int(len(melody) - 2))
+            print("sebelum mutasi : ")
+            print([str(p) for p in melody.pitches])
             print("indeks mutasi : " + str(index))
             a = note.Note(random.choice(myscale.getPitches()))
             a.quarterLength = melody[index].quarterLength
             melody.replace(melody[index], a)
+            print([str(p) for p in melody.pitches])
     return melody
 
 
@@ -174,6 +177,14 @@ def create_midi(population, tngganada, nd_dasar, generation_id, inst):
         # allFiles.append(f"static/uploads/{time_folder}/{generation_id}/test"+ str(count) +'.mid')
     return allFiles
 
+def create_multi_xml(population, tngganada, nd_dasar, generation_id):
+    os.makedirs(f"static/uploads/{time_folder}/{generation_id}", exist_ok=True)
+    for count, x in enumerate(population):
+        x.keySignature = key.Key(nd_dasar, tngganada)
+        filepath = f"static/uploads/{time_folder}/{generation_id}/rank"+ str(count+1) + "_" + nd_dasar + tngganada
+        x.write('musicxml', fp=filepath)
+        x.pop(0)
+
 def create_pdf(music21stream, tngganada, nd_dasar, generation_id, count):
     os.makedirs(f"static/uploads/{time_folder}/{generation_id}", exist_ok=True)
     conv =  converter.subConverters.ConverterLilypond()
@@ -193,6 +204,3 @@ def create_multi_pdf(population, tngganada, nd_dasar, generation_id):
         filepath = f"static/uploads/{time_folder}/{generation_id}/rank"+ str(count) + "_" + nd_dasar + tngganada
         conv.write(x, fmt = 'lilypond', fp=filepath, subformats = ['pdf'])
         x.pop(0)
-    #s = corpus.parse(littleMelody)
-    #littleMelody.show('midi')
-    #littleMelody.clear()
