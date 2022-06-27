@@ -4,7 +4,7 @@ from httplib2 import Response
 from matplotlib import pyplot as plt
 import matplotlib.ticker as mtick
 import numpy as np
-from musicgen import create_pdf, buat_chromosome, get_keyscale, create_midi, single_point_crossover, tournament_selection, mutation
+from musicgen import create_multi_xml, create_pdf, buat_chromosome, get_keyscale, create_midi, single_point_crossover, tournament_selection, mutation
 import secrets
 import pyrebase
 import os
@@ -110,12 +110,13 @@ def evaluate():
 				index = random.randint(1, int(len(selectedParents[num]))-1)
 				print(str([str(p) for p in selectedParents[num].pitches]) + " cross w/ \n" + str([str(p) for p in selectedParents[num+1].pitches]) + " , indeks perpotongan : " + str(index))
 				offspring_a, offspring_b = single_point_crossover(selectedParents[num], selectedParents[num+1], index)
+				print('hasil :')
+				print(str([str(p) for p in offspring_a.pitches]) + "\n" + str([str(p) for p in offspring_b.pitches]) + "\n")
 				offsprings.append(offspring_a)
 				offsprings.append(offspring_b)
 
 		for num in range(int(len(offsprings))):
-			offsprings[num] = mutation(offsprings[num], user_dict[ukey]["db_data"][0], user_dict[ukey]["db_data"][1], num=2, probability=0.5)
-			print([str(p) for p in offsprings[num].pitches])
+			offsprings[num] = mutation(offsprings[num], user_dict[ukey]["db_data"][0], user_dict[ukey]["db_data"][1], num=int(len(offsprings[num])/4), probability=0.5)
 		
 		user_dict[ukey]["db_data"][2] += 1
 		user_dict[ukey]["population"] = offsprings
@@ -129,14 +130,13 @@ def download():
 		if 'user' in session:
 			ukey = session['user']
 
-		
-		path = user_dict[ukey]["db_data"][4]
+		create_multi_xml(user_dict[ukey]["population"], user_dict[ukey]["db_data"][0], user_dict[ukey]["db_data"][1], user_dict[ukey]["db_data"][2])
 
 		db.child("users").child(ukey).set(user_dict[ukey]["db_data"])
 
 		create_figure(ukey)
 
-	return render_template("download.html", path=path, user_dict=user_dict[ukey]["db_data"], done=True)
+	return render_template("download.html", user_dict=user_dict[ukey]["db_data"], done=True)
 
 @app.route('/downloadpdf/<path:index_pop>', methods=['POST', 'GET'])
 def downloadpdf(index_pop):

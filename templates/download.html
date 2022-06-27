@@ -57,23 +57,26 @@
             <h2 class="section__title">
                 Download Results
             </h2>
+            <p class="section__subtitle">
+                *It's Done, Thanks <br> *Sudah selesai, terimakasih ya
+            </p>
 
             <div class="new__container">
-                {% if path %}
+                {% if user_dict.4 %}
                 <h3>Generation {{user_dict.2}}</h3>
                 <p>Instrument : {{user_dict.3}}</p>
                 <p>Scale : {{user_dict.0}}</p>
                 <p>Key : {{user_dict.1}}</p>
                 <div class="swiper new-swiper">
                     <div class="swiper-wrapper">
-                        {% for result in path %}
+                        {% for result in user_dict.4 %}
                         <article class="new__card swiper-slide">
                             <div class="new__overlay"></div>
                             
                             <h3>Melody rank {{loop.index}}</h3>
                             <a href="{{result}}.mid" class="button download__button"><i class='bx bx-download'></i> .MIDI</a>
-                            <a href="downloadpdf/{{loop.index}}" class="button download__button"><i class='bx bx-download'></i> .PDF</a>
-                            <!-- <a href="{{result}}.musicxml" class="button download__button"><i class='bx bx-download'></i> .XML</a> -->
+                            <!-- <a href="downloadpdf/{{loop.index}}" class="button download__button"><i class='bx bx-download'></i> .PDF</a> -->
+                            <a href="{{result}}.musicxml" class="button download__button"><i class='bx bx-download'></i> .XML</a>
                             <div id="midi{{loop.index}}" class="section3">
                                 <midi-player
                                     src={{result}}.mid
