@@ -1,3 +1,4 @@
+from collections import UserDict
 import random
 from flask import Flask, render_template, request, session, flash, redirect, url_for, send_from_directory, current_app, send_file
 from httplib2 import Response
@@ -29,8 +30,6 @@ firebase = pyrebase.initialize_app(firebase_config)
 db=firebase.database()
 
 user_dict = {}
-test = []
-sum_fitnesses = []
 
 def silentremove(filename):
     try:
@@ -49,6 +48,8 @@ def start():
 		stepValue = request.form["step"]
 		if stepValue == "initiate":
 			# token = secrets.token_urlsafe(16)
+			sum_fitnesses = []
+
 			ukey = str(request.form.get("Nickname"))
 			age=int(request.form.get("Age"))
 			email = str(request.form.get("email"))
@@ -76,6 +77,7 @@ def evaluate():
 		if 'user' in session:
 			ukey = session['user']
 		rate = []
+
 		population_size = len(user_dict[ukey]["population"])
 		print("population size " + str(population_size))
 		for x in range(population_size):
@@ -97,7 +99,7 @@ def evaluate():
 		pop_length = int(len(population_fitness))
 		while pop_length > 1:
 			a = tournament_selection(population_fitness)
-			print("winner : " + str(a))
+			# print("winner : " + str(a))
 			b = population_fitness[a][0]
 			selectedParents.append(b)
 			pop_length -= 1
@@ -108,10 +110,10 @@ def evaluate():
 			# checking condition
 			if num % 2 == 0:
 				index = random.randint(1, int(len(selectedParents[num]))-1)
-				print(str([str(p) for p in selectedParents[num].pitches]) + " cross w/ \n" + str([str(p) for p in selectedParents[num+1].pitches]) + " , indeks perpotongan : " + str(index))
+				# print(str([str(p) for p in selectedParents[num].pitches]) + " cross w/ \n" + str([str(p) for p in selectedParents[num+1].pitches]) + " , indeks perpotongan : " + str(index))
 				offspring_a, offspring_b = single_point_crossover(selectedParents[num], selectedParents[num+1], index)
-				print('hasil :')
-				print(str([str(p) for p in offspring_a.pitches]) + "\n" + str([str(p) for p in offspring_b.pitches]) + "\n")
+				# print('hasil :')
+				# print(str([str(p) for p in offspring_a.pitches]) + "\n" + str([str(p) for p in offspring_b.pitches]) + "\n")
 				offsprings.append(offspring_a)
 				offsprings.append(offspring_b)
 
