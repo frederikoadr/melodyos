@@ -68,7 +68,8 @@ def start():
 
 			session['user'] = ukey
 			user_dict.update({ukey:{"db_data":[scale, key, generation_num, instrument, path, sum_fitnesses, age, experience, email], "population":population}})
-			
+			db.child("users").child(ukey).set(user_dict[ukey]["db_data"])
+
 	return render_template("evaluate.html", path=path, generation_num=user_dict[ukey]["db_data"][2])
 
 @app.route('/evaluate', methods=['POST', 'GET'])
