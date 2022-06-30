@@ -78,7 +78,8 @@ def evaluate():
 		rate = []
 		print(user_dict)
 
-		if user_dict[ukey]["population"]:
+		session['user'] = ukey
+		if user_dict:
 			population_size = len(user_dict[ukey]["population"])
 		else:
 			population_size = 4
@@ -128,7 +129,6 @@ def evaluate():
 		user_dict[ukey]["population"] = offsprings
 		path = create_midi(user_dict[ukey]["population"], user_dict[ukey]["db_data"][0], user_dict[ukey]["db_data"][1], user_dict[ukey]["db_data"][2], user_dict[ukey]["db_data"][3])
 		user_dict[ukey]["db_data"][4] = path
-		session['user'] = ukey
 	return render_template("evaluate.html", path=path, generation_num=user_dict[ukey]["db_data"][2])
 
 @app.route('/download', methods=['POST', 'GET'])

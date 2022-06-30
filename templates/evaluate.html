@@ -52,14 +52,14 @@
     <!--==================== MAIN ====================-->
     <main class="main">
         <!--==================== RATE ====================-->
-        <section class="gift section container" id="gift">
+        <section class="gift section container" id="rate">
             <h2 class="section__title">
                 Rate Melodies
             </h2>
             <p class="section__subtitle">*please rate each melody then click continue for at least 5 generations, then click download <br> the melody will 'evolve' according to your liking</p>
             <p class="section__subtitle">*silakan nilai/beri bintang tiap melodi lalu klik continue minimal 5 generasi, lalu klik download. Refresh jika eror</p>
             {% if path %}
-                <form action="/evaluate#gift" method="post">
+                <form action="/evaluate#rate" method="post">
                 <div class="gift__container grid">
                 <h3>Generation {{generation_num}}</h3>
                     {% for result in path %}
