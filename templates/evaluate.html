@@ -90,7 +90,7 @@
                     {% endfor %}
                     <div class="content">
                         <p>the melody can be improved again by continuously rating or evaluating</p>
-                        <input type="hidden" name="step" value="evaluate">
+                        <input type="hidden" name="step">
                         <input type="hidden" name="numMelodies" value={{path|count}}>
                         <button type="submit" value="submit" class="button">Continue</button>
                         </form>
@@ -98,7 +98,7 @@
                         <form action="/download#new" method="post">
                         <p>or if that's enough, you can start downloading the results</p>
                         <input type="hidden" name="pathMelodies" value={{path|count}}>
-                        <button type="submit" name="step" value="download" class="button">Download</button>
+                        <button type="submit" name="step" class="button">Download</button>
                         </form>
                         {% endif %}
                         <!-- <p>or restart from beginnig</p>
