@@ -128,6 +128,7 @@ def evaluate():
 		user_dict[ukey]["population"] = offsprings
 		path = create_midi(user_dict[ukey]["population"], user_dict[ukey]["db_data"][0], user_dict[ukey]["db_data"][1], user_dict[ukey]["db_data"][2], user_dict[ukey]["db_data"][3])
 		user_dict[ukey]["db_data"][4] = path
+		session['user'] = ukey
 	return render_template("evaluate.html", path=path, generation_num=user_dict[ukey]["db_data"][2])
 
 @app.route('/download', methods=['POST', 'GET'])
