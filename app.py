@@ -76,6 +76,7 @@ def evaluate():
 		if 'user' in session:
 			ukey = session['user']
 		rate = []
+		print(user_dict)
 
 		if user_dict[ukey]["population"]:
 			population_size = len(user_dict[ukey]["population"])
