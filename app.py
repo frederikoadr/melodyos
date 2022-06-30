@@ -45,30 +45,28 @@ def index():
 def start():
 	generation_num = 1
 	if request.method=='POST':
-		stepValue = request.form["step"]
-		if stepValue == "initiate":
-			# token = secrets.token_urlsafe(16)
-			sum_fitnesses = []
+		# token = secrets.token_urlsafe(16)
+		sum_fitnesses = []
 
-			ukey = str(request.form.get("Nickname"))
-			age=int(request.form.get("Age"))
-			email = str(request.form.get("email"))
-			experience = str(request.form.get("Experience"))
+		ukey = str(request.form.get("Nickname"))
+		age=int(request.form.get("Age"))
+		email = str(request.form.get("email"))
+		experience = str(request.form.get("Experience"))
 
-			population_size=int(request.form.get("numMelodies"))
-			juml_not=int(request.form.get("numNotes"))
-			scale=str(request.form.get("scale"))
-			key=str(request.form.get("key"))
-			instrument=str(request.form.get("inst"))
-			
-			population = [buat_chromosome(juml_not, scale, key, population_size) for _ in range(population_size)]
-			path = create_midi(population, scale, key, generation_num, instrument)
-			
-			silentremove('static/uploads/user_fig.jpg')
+		population_size=int(request.form.get("numMelodies"))
+		juml_not=int(request.form.get("numNotes"))
+		scale=str(request.form.get("scale"))
+		key=str(request.form.get("key"))
+		instrument=str(request.form.get("inst"))
+		
+		population = [buat_chromosome(juml_not, scale, key, population_size) for _ in range(population_size)]
+		path = create_midi(population, scale, key, generation_num, instrument)
+		
+		silentremove('static/uploads/user_fig.jpg')
 
-			session['user'] = ukey
-			user_dict.update({ukey:{"db_data":[scale, key, generation_num, instrument, path, sum_fitnesses, age, experience, email], "population":population}})
-			db.child("users").child(ukey).set(user_dict[ukey]["db_data"])
+		session['user'] = ukey
+		user_dict.update({ukey:{"db_data":[scale, key, generation_num, instrument, path, sum_fitnesses, age, experience, email], "population":population}})
+		db.child("users").child(ukey).set(user_dict[ukey]["db_data"])
 
 	return render_template("evaluate.html", path=path, generation_num=user_dict[ukey]["db_data"][2])
 
@@ -79,7 +77,11 @@ def evaluate():
 			ukey = session['user']
 		rate = []
 
-		population_size = len(user_dict[ukey]["population"])
+		if user_dict[ukey]["population"]:
+			population_size = len(user_dict[ukey]["population"])
+		else:
+			population_size = 4
+
 		print("population size " + str(population_size))
 		for x in range(population_size):
 			rate.append(int(request.form.get("rating" + str(x+1))))
