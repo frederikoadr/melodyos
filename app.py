@@ -1,6 +1,6 @@
 from collections import UserDict
 import random
-from flask import Flask, render_template, request, session, flash, redirect, url_for, send_from_directory, current_app, send_file
+from flask import Flask, render_template, request, session, current_app, flash, redirect, url_for, send_from_directory, current_app, send_file
 from httplib2 import Response
 from matplotlib import pyplot as plt
 import matplotlib.ticker as mtick
@@ -9,7 +9,6 @@ from musicgen import create_multi_xml, create_pdf, buat_chromosome, get_keyscale
 import secrets
 import pyrebase
 import os
-from app import user_dict
 from dotenv import load_dotenv
 
 app = Flask(__name__)
@@ -68,6 +67,8 @@ def start():
 
 		user_dict.update({ukey:{"db_data":[scale, key, generation_num, instrument, path, sum_fitnesses, age, experience, email], "population":population}})
 		session['user'] = ukey
+		with app.app_context():
+			current_app.config['user_dict'] = user_dict
 
 		db.child("users").child(ukey).set(user_dict[ukey]["db_data"])
 
@@ -80,6 +81,10 @@ def evaluate():
 		if 'user' in session:
 			ukey = session['user']
 		rate = []
+		
+		with app.app_context():
+			user_dict = current_app.config['user_dict']
+
 		print(user_dict)
 
 		session['user'] = ukey
