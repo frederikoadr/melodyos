@@ -9,6 +9,7 @@ from musicgen import create_multi_xml, create_pdf, buat_chromosome, get_keyscale
 import secrets
 import pyrebase
 import os
+from app import user_dict
 from dotenv import load_dotenv
 
 app = Flask(__name__)
@@ -43,6 +44,7 @@ def index():
 
 @app.route('/', methods=['POST', 'GET'])
 def start():
+	global user_dict
 	generation_num = 1
 	if request.method=='POST':
 		# token = secrets.token_urlsafe(16)
@@ -64,9 +66,8 @@ def start():
 		
 		silentremove('static/uploads/user_fig.jpg')
 
-		session['user'] = ukey
-		global user_dict
 		user_dict.update({ukey:{"db_data":[scale, key, generation_num, instrument, path, sum_fitnesses, age, experience, email], "population":population}})
+		session['user'] = ukey
 
 		db.child("users").child(ukey).set(user_dict[ukey]["db_data"])
 
@@ -74,19 +75,18 @@ def start():
 
 @app.route('/evaluate', methods=['POST', 'GET'])
 def evaluate():
+	global user_dict
 	if request.method=='POST':
 		if 'user' in session:
 			ukey = session['user']
-
-		global user_dict
 		rate = []
 		print(user_dict)
 
 		session['user'] = ukey
-		if user_dict:
-			population_size = len(user_dict[ukey]["population"])
-		else:
-			population_size = 4
+		# if user_dict:
+		# 	population_size = len(user_dict[ukey]["population"])
+		# else:
+		population_size = 4
 
 		print("population size " + str(population_size))
 		for x in range(population_size):
