@@ -65,7 +65,9 @@ def start():
 		silentremove('static/uploads/user_fig.jpg')
 
 		session['user'] = ukey
+		global user_dict
 		user_dict.update({ukey:{"db_data":[scale, key, generation_num, instrument, path, sum_fitnesses, age, experience, email], "population":population}})
+
 		db.child("users").child(ukey).set(user_dict[ukey]["db_data"])
 
 	return render_template("evaluate.html", path=path, generation_num=user_dict[ukey]["db_data"][2])
@@ -75,6 +77,8 @@ def evaluate():
 	if request.method=='POST':
 		if 'user' in session:
 			ukey = session['user']
+
+		global user_dict
 		rate = []
 		print(user_dict)
 
@@ -134,6 +138,7 @@ def evaluate():
 @app.route('/download', methods=['POST', 'GET'])
 def download():
 	if request.method=='POST':
+		global user_dict
 		if 'user' in session:
 			ukey = session['user']
 
@@ -149,6 +154,7 @@ def download():
 def downloadpdf(index_pop):
 	if 'user' in session:
 		ukey = session['user']
+	global user_dict
 	pdfpath = create_pdf(user_dict[ukey]["population"][int(index_pop)-1], user_dict[ukey]["db_data"][0], user_dict[ukey]["db_data"][1], user_dict[ukey]["db_data"][2], index_pop)
 
 	return send_file(pdfpath, as_attachment=True)
@@ -204,6 +210,7 @@ def data():
 	return render_template("data.html", users_data=users_data)
 
 def create_figure(ukey):
+	global user_dict
 	population_num = user_dict[ukey]["db_data"][2]
 
 	plt.style.use('seaborn')
