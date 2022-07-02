@@ -10,6 +10,7 @@ import pyrebase
 import os
 import jsonpickle
 from copy import deepcopy
+from flask_session import Session
 from dotenv import load_dotenv
 
 app = Flask(__name__)
@@ -18,6 +19,7 @@ UPLOAD_FOLDER = 'uploads/'
 app.config['SESSION_REFRESH_EACH_REQUEST'] = False
 app.config['SESSION_PERMANENT'] = True
 app.config['SESSION_TYPE'] = 'filesysterm'
+Session(app)
 
  firebase_config = {
     'apiKey': os.getenv('FIREBASE_API_KEY'),
@@ -83,7 +85,6 @@ def evaluate():
 		if 'user' in session:
 			ukey = deepcopy(session['user'])
 		user_dict = deepcopy(session['user_dict'])
-		print(user_dict[ukey]["db_data"])
 		# if user_dict:
 		# 	population_size = len(user_dict[ukey]["population"])
 		# else:
