@@ -1,7 +1,6 @@
 from collections import UserDict
 import random
-from flask import Flask, render_template, request, session, current_app, flash, redirect, url_for, send_from_directory, current_app, send_file
-from httplib2 import Response
+from flask import Flask, render_template, request, session, current_app, flash, redirect, url_for, send_from_directory, current_app
 from matplotlib import pyplot as plt
 import matplotlib.ticker as mtick
 import numpy as np
@@ -9,12 +8,17 @@ from musicgen import create_multi_xml, create_pdf, buat_chromosome, get_keyscale
 import secrets
 import pyrebase
 import os
+import jsonpickle
+from copy import deepcopy
 from dotenv import load_dotenv
 
 app = Flask(__name__)
 app.secret_key = 'SECRET_KEY' #secrets.token_urlsafe(16)
-app.config['SESSION_COOKIE_NAME'] = "my_session"
 UPLOAD_FOLDER = 'uploads/'
+app.config['SESSION_REFRESH_EACH_REQUEST'] = False
+app.config['SESSION_PERMANENT'] = True
+app.config['SESSION_TYPE'] = 'filesysterm'
+
  firebase_config = {
     'apiKey': os.getenv('FIREBASE_API_KEY'),
     'authDomain': os.getenv('FIREBASE_AUTH_DOMAIN'),
@@ -29,8 +33,6 @@ UPLOAD_FOLDER = 'uploads/'
 firebase = pyrebase.initialize_app(firebase_config)
 db=firebase.database()
 
-user_dict = {}
-
 def silentremove(filename):
     try:
         os.remove(filename)
@@ -43,7 +45,7 @@ def index():
 
 @app.route('/', methods=['POST', 'GET'])
 def start():
-	global user_dict
+	user_dict = {}
 	generation_num = 1
 	if request.method=='POST':
 		# token = secrets.token_urlsafe(16)
@@ -65,10 +67,11 @@ def start():
 		
 		silentremove('static/uploads/user_fig.jpg')
 
-		user_dict.update({ukey:{"db_data":[scale, key, generation_num, instrument, path, sum_fitnesses, age, experience, email], "population":population}})
+		popu_encoded = jsonpickle.encode(population)
+
+		user_dict.update({ukey:{"db_data":[scale, key, generation_num, instrument, path, sum_fitnesses, age, experience, email], "population":popu_encoded}})
 		session['user'] = ukey
-		with app.app_context():
-			current_app.config['user_dict'] = user_dict
+		session['user_dict'] = user_dict
 
 		db.child("users").child(ukey).set(user_dict[ukey]["db_data"])
 
@@ -76,30 +79,25 @@ def start():
 
 @app.route('/evaluate', methods=['POST', 'GET'])
 def evaluate():
-	global user_dict
 	if request.method=='POST':
 		if 'user' in session:
-			ukey = session['user']
-		rate = []
-		
-		with app.app_context():
-			user_dict = current_app.config['user_dict']
-
-		print(user_dict)
-
-		session['user'] = ukey
+			ukey = deepcopy(session['user'])
+		user_dict = deepcopy(session['user_dict'])
+		print(user_dict[ukey]["db_data"])
 		# if user_dict:
 		# 	population_size = len(user_dict[ukey]["population"])
 		# else:
 		population_size = 4
+		popu_decoded = jsonpickle.decode(user_dict[ukey]["population"])
 
+		rate = []
 		print("population size " + str(population_size))
 		for x in range(population_size):
 			rate.append(int(request.form.get("rating" + str(x+1))))
 		
 		user_dict[ukey]["db_data"][5].append(sum(rate))
 
-		population_fitness = [(user_dict[ukey]["population"][idx], fitnes) for idx, fitnes in enumerate(rate)]
+		population_fitness = [(popu_decoded[idx], fitnes) for idx, fitnes in enumerate(rate)]
 		selectedParents = []
 
 		#tournament selection w/ removing selcted, for diversity among population; q:does it necessary?
@@ -133,36 +131,42 @@ def evaluate():
 
 		for num in range(int(len(offsprings))):
 			offsprings[num] = mutation(offsprings[num], user_dict[ukey]["db_data"][0], user_dict[ukey]["db_data"][1], num=int(len(offsprings[num])/4), probability=0.5)
-		
+
 		user_dict[ukey]["db_data"][2] += 1
-		user_dict[ukey]["population"] = offsprings
-		path = create_midi(user_dict[ukey]["population"], user_dict[ukey]["db_data"][0], user_dict[ukey]["db_data"][1], user_dict[ukey]["db_data"][2], user_dict[ukey]["db_data"][3])
+		user_dict[ukey]["population"] = jsonpickle.encode(offsprings)
+		path = create_midi(offsprings, user_dict[ukey]["db_data"][0], user_dict[ukey]["db_data"][1], user_dict[ukey]["db_data"][2], user_dict[ukey]["db_data"][3])
 		user_dict[ukey]["db_data"][4] = path
+
+		session['ukey'] = ukey
+		session['user_dict'] = user_dict
+		session.modified = True
+
 	return render_template("evaluate.html", path=path, generation_num=user_dict[ukey]["db_data"][2])
 
 @app.route('/download', methods=['POST', 'GET'])
 def download():
 	if request.method=='POST':
-		global user_dict
 		if 'user' in session:
 			ukey = session['user']
+		user_dict = session['user_dict']
+		popu_decoded = jsonpickle.decode(user_dict[ukey]["population"])
 
-		create_multi_xml(user_dict[ukey]["population"], user_dict[ukey]["db_data"][0], user_dict[ukey]["db_data"][1], user_dict[ukey]["db_data"][2])
+		create_multi_xml(popu_decoded, user_dict[ukey]["db_data"][0], user_dict[ukey]["db_data"][1], user_dict[ukey]["db_data"][2])
 
 		db.child("users").child(ukey).set(user_dict[ukey]["db_data"])
 
-		create_figure(ukey)
+		create_figure(ukey, user_dict)
 
 	return render_template("download.html", user_dict=user_dict[ukey]["db_data"], done=True)
 
-@app.route('/downloadpdf/<path:index_pop>', methods=['POST', 'GET'])
-def downloadpdf(index_pop):
-	if 'user' in session:
-		ukey = session['user']
-	global user_dict
-	pdfpath = create_pdf(user_dict[ukey]["population"][int(index_pop)-1], user_dict[ukey]["db_data"][0], user_dict[ukey]["db_data"][1], user_dict[ukey]["db_data"][2], index_pop)
+# # @app.route('/downloadpdf/<path:index_pop>', methods=['POST', 'GET'])
+# # def downloadpdf(index_pop):
+# # 	if 'user' in session:
+# # 		ukey = session['user']
+# # 	global user_dict
+# # 	pdfpath = create_pdf(user_dict[ukey]["population"][int(index_pop)-1], user_dict[ukey]["db_data"][0], user_dict[ukey]["db_data"][1], user_dict[ukey]["db_data"][2], index_pop)
 
-	return send_file(pdfpath, as_attachment=True)
+# 	return send_file(pdfpath, as_attachment=True)
 
 @app.route('/datadmin', methods=['POST', 'GET'])
 def data():
@@ -214,8 +218,7 @@ def data():
 	save_figure(ax_single, fig_single, 'avg')
 	return render_template("data.html", users_data=users_data)
 
-def create_figure(ukey):
-	global user_dict
+def create_figure(ukey, user_dict):
 	population_num = user_dict[ukey]["db_data"][2]
 
 	plt.style.use('seaborn')
@@ -242,5 +245,5 @@ def save_figure(ax, fig, pathid):
 
 
 # main driver function
-# if __name__ == '__main__':
-# 	app.run(debug=True)
+if __name__ == '__main__':
+	app.run(debug=True)
