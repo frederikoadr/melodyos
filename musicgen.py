@@ -1,6 +1,6 @@
 from random import choices, randrange, sample
 from datetime import datetime, time
-from music21 import instrument, note, stream, converter, midi, scale, audioSearch, alpha, configure, key, environment
+from music21 import instrument, note, stream, converter, midi, scale, audioSearch, alpha, configure, key, environment, metadata
 import os
 import shutil
 import matplotlib.pyplot as plt
@@ -177,10 +177,13 @@ def create_midi(population, tngganada, nd_dasar, generation_id, inst):
         # allFiles.append(f"static/uploads/{time_folder}/{generation_id}/test"+ str(count) +'.mid')
     return allFiles
 
-def create_multi_xml(population, tngganada, nd_dasar, generation_id):
+def create_multi_xml(population, tngganada, nd_dasar, generation_id, uname):
     os.makedirs(f"static/uploads/{time_folder}/{generation_id}", exist_ok=True)
     for count, x in enumerate(population):
         x.keySignature = key.Key(nd_dasar, tngganada)
+        x.insert(0, metadata.Metadata())
+        x.metadata.title = f'Melodyos {nd_dasar} {tngganada}'
+        x.metadata.composer = uname
         filepath = f"static/uploads/{time_folder}/{generation_id}/rank"+ str(count+1) + "_" + nd_dasar + tngganada
         x.write('musicxml', fp=filepath)
         x.pop(0)

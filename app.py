@@ -9,9 +9,11 @@ import secrets
 import pyrebase
 import os
 import jsonpickle
+import pandas as pd
 from copy import deepcopy
 from flask_session import Session
 from dotenv import load_dotenv
+
 
 app = Flask(__name__)
 app.secret_key = 'SECRET_KEY' #secrets.token_urlsafe(16)
@@ -152,7 +154,7 @@ def download():
 		user_dict = session['user_dict']
 		popu_decoded = jsonpickle.decode(user_dict[ukey]["population"])
 
-		create_multi_xml(popu_decoded, user_dict[ukey]["db_data"][0], user_dict[ukey]["db_data"][1], user_dict[ukey]["db_data"][2])
+		create_multi_xml(popu_decoded, user_dict[ukey]["db_data"][0], user_dict[ukey]["db_data"][1], user_dict[ukey]["db_data"][2], ukey)
 
 		db.child("users").child(ukey).set(user_dict[ukey]["db_data"])
 
@@ -182,7 +184,7 @@ def data():
 	users_data = []
 	for user in users.each():
 		user_count += 1
-		population_num = user.val()[2]
+		population_num = 4
 
 		sum_fit = []
 		for single_sum_fit in user.val()[5]:
@@ -213,14 +215,36 @@ def data():
 	save_figure(ax, fig, 'sum')
 
 	ax_single.cla()
-	y_avg = [np.mean(mean_y_axis)] * len(mean_x_axis)
-	ax_single.plot(mean_x_axis, mean_y_axis, '--', label='Mean')
-	ax_single.plot(mean_x_axis, y_avg, label='Avg Mean')
+	s = pd.Series(mean_y_axis)
+	df_rolling = s.rolling(2, min_periods=1).mean()
+	# y_avg = [np.mean(mean_y_axis)] * len(mean_x_axis)
+	ax_single.plot(mean_x_axis, mean_y_axis, 'o--', label='Mean')
+	ax_single.plot(mean_x_axis, df_rolling, label='Moving Average')
 	save_figure(ax_single, fig_single, 'avg')
-	return render_template("data.html", users_data=users_data)
+
+	ax_single.cla()
+	s = pd.Series(mean_y_axis)
+	print(s)
+	print(s.pct_change().mul(100))
+	t = np.mean(s.pct_change().mul(100))
+	print(t)
+
+	ax_single.cla()
+	list_iteration = []
+	for j in users_data:
+		list_iteration.append(j[3]-1)
+	ax_single.hist(list_iteration)
+	ax_single.xaxis.set_major_locator(mtick.MultipleLocator(1))
+	ax_single.set_title("Jumlah iterasi di setiap pengguna")
+	ax_single.set_xlabel("Jumlah iterasi")
+	ax_single.set_ylabel("Jumlah pengguna")
+	plt.tight_layout()
+	fig_single.savefig('static/uploads/fig_histogram.jpg', dpi=65)
+	epoch_mean = np.mean(list_iteration)
+	return render_template("data.html", users_data=users_data, epoch_mean=epoch_mean, s=s.index.tolist(), t=s.pct_change().mul(100).index.tolist())
 
 def create_figure(ukey, user_dict):
-	population_num = user_dict[ukey]["db_data"][2]
+	population_num = 4
 
 	plt.style.use('seaborn')
 	fig, ax = plt.subplots()
@@ -243,7 +267,6 @@ def save_figure(ax, fig, pathid):
 	ax.set_ylabel("Presentase ketertarikan/fitness")
 	plt.tight_layout()
 	fig.savefig('static/uploads/fig_' + pathid + '.jpg', dpi=65)
-
 
 # main driver function
 if __name__ == '__main__':
