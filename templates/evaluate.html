@@ -56,8 +56,8 @@
             <h2 class="section__title">
                 Rate Melodies
             </h2>
-            <p class="section__subtitle">*please rate each melody then click continue for at least 5 generations, then click download <br> the melody will 'evolve' according to your liking</p>
-            <p class="section__subtitle">*silakan nilai/beri bintang tiap melodi lalu klik continue minimal 5 generasi, lalu klik download. Refresh jika eror</p>
+            <p class="section__subtitle">*please rate each melody then click continue for at least 3 generations, then click download <br> the melody will 'evolve' according to your liking</p>
+            <!-- <p class="section__subtitle">*silakan nilai/beri bintang tiap melodi lalu klik continue minimal 5 generasi, lalu klik download. Refresh jika eror</p> -->
             {% if path %}
                 <form action="/evaluate#rate" method="post">
                 <div class="gift__container grid">
@@ -94,7 +94,7 @@
                         <input type="hidden" name="numMelodies" value={{path|count}}>
                         <button type="submit" value="submit" class="button">Continue</button>
                         </form>
-                        {% if generation_num > 4 %}
+                        {% if generation_num > 2%}
                         <form action="/download#new" method="post">
                         <p>or if that's enough, you can start downloading the results</p>
                         <input type="hidden" name="pathMelodies" value={{path|count}}>
