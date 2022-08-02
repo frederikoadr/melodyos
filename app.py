@@ -200,7 +200,7 @@ def data():
 
 		ax_single.cla()
     
-		ax_single.plot(gen_list, sum_fit, 's-', label=user.key())
+		ax_single.plot(gen_list, sum_fit, 's-', label='User '+str(user_count))
 		save_figure(ax_single, fig_single, str(user_count))
 		
 		users_data.append([user.key(), user.val()[0], user.val()[1], user.val()[2], user.val()[3], user.val()[6], user.val()[7], user.val()[8]])
@@ -218,12 +218,14 @@ def data():
 	s = pd.Series(mean_y_axis)
 	df_rolling = s.rolling(2, min_periods=1).mean()
 	# y_avg = [np.mean(mean_y_axis)] * len(mean_x_axis)
+	for i, v in enumerate(mean_y_axis):
+		ax_single.text(i, v+25, "%d" %v, ha="center")
 	ax_single.plot(mean_x_axis, mean_y_axis, 'o--', label='Mean')
 	ax_single.plot(mean_x_axis, df_rolling, label='Moving Average')
 	save_figure(ax_single, fig_single, 'avg')
 
-	ax_single.cla()
 	s = pd.Series(mean_y_axis)
+	ax_single.cla()
 	print(s)
 	print(s.pct_change().mul(100))
 	t = np.mean(s.pct_change().mul(100))
@@ -241,7 +243,7 @@ def data():
 	plt.tight_layout()
 	fig_single.savefig('static/uploads/fig_histogram.jpg', dpi=65)
 	epoch_mean = np.mean(list_iteration)
-	return render_template("data.html", users_data=users_data, epoch_mean=epoch_mean, s=s.index.tolist(), t=s.pct_change().mul(100).index.tolist())
+	return render_template("data.html", users_data=users_data, epoch_mean=epoch_mean, s=s.values.tolist() , t=s.pct_change().mul(100).values.tolist())
 
 def create_figure(ukey, user_dict):
 	population_num = 4
