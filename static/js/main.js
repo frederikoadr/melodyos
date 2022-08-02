@@ -82,6 +82,19 @@ function scrollUp(){
   }
 window.addEventListener('scroll', scrollUp)
 
+/*=============== CHANGE MIDI VISUALIsER ===============*/ 
+function val(index){
+    const visualizer = document.querySelectorAll('.visualizer');
+    const choose_visualizer = document.querySelectorAll('.choose__visualizer');
+
+    visualizer.forEach(box => {
+        box.type = index.value
+    });
+    choose_visualizer.forEach(box => {
+        box.value = index.value
+    });
+}
+
 /*=============== DARK LIGHT THEME ===============*/ 
 const themeButton = document.getElementById('theme-button')
 const darkTheme = 'dark-theme'

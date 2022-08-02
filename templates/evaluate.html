@@ -70,7 +70,13 @@
                                 src={{result}}.mid
                                 sound-font="https://storage.googleapis.com/magentadata/js/soundfonts/sgm_plus" visualizer="#midi{{loop.index}} midi-visualizer">
                             </midi-player>				
-                            <midi-visualizer type="piano-roll"></midi-visualizer>
+                            <midi-visualizer type="piano-roll" class="visualizer">
+                                <select class="choose__visualizer" onchange="val(this)">
+                                    <option value="piano-roll">Piano Roll</option>
+                                    <option value="waterfall">Waterfall</option>
+                                    <option value="staff">Staff</option>
+                                </select>
+                            </midi-visualizer>
                             <div class="button rate__button">
                                 <div class="star-rating">
                                     <input type="radio" id="5-stars{{loop.index}}" name="rating{{loop.index}}" value="5" />

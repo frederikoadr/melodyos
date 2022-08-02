@@ -22,11 +22,11 @@
     <h2>Data seluruh user dan rata rata</h2>
     <img src="static/uploads/fig_sum.jpg" alt="gambar tingkat ketertarikan di setiap iterasi">
     <br>
-    <h2>Rata rata</h2>
-    <img src="static/uploads/fig_avg.jpg" alt="gambar rata rata tingkat ketertarikan di setiap iterasi">
     <h2>Iterasi Histogram</h2>
     <p>Rata rata jumlah iterasi / epoch {{epoch_mean}}</p>
     <img src="static/uploads/fig_histogram.jpg" alt="">
+    <h2>Rata rata</h2>
+    <img src="static/uploads/fig_avg.jpg" alt="gambar rata rata tingkat ketertarikan di setiap iterasi">
     <table>
         <tbody>
             <tr>
@@ -39,6 +39,9 @@
                 <td>{{loop.index}}</td>
                 <td>
                     {{i}}
+                </td>
+                <td>
+                    -
                 </td>
             </tr>
             {% endfor %}

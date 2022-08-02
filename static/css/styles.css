@@ -505,7 +505,6 @@ select::-ms-expand {
   top: 0;
 }
 
-
 /*=============== GIFT ===============*/
 .gift__container{
   grid-template-columns: repeat(1, 1fr);
@@ -582,7 +581,7 @@ select::-ms-expand {
 
 /* Custom visualizer style */
 .section3 midi-visualizer .piano-roll-visualizer {
-  background: rgb(51, 51, 51);
+  background: var(--body-color);
   border: 2px solid black;
   border-top: none;
   border-radius: 0 0 10px 10px;
@@ -609,6 +608,13 @@ select::-ms-expand {
 .section3 midi-visualizer svg rect.note.active {
   opacity: 0.9;
   stroke: #000;
+}
+midi-visualizer select{
+  position: relative;
+  top: 0;
+  right: 0;
+  height: 2rem;
+  margin-bottom: 0;
 }
 
 /*=============== NEW ===============*/
