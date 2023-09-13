@@ -4,7 +4,7 @@ from flask import Flask, render_template, request, session, current_app, flash, 
 from matplotlib import pyplot as plt
 import matplotlib.ticker as mtick
 import numpy as np
-from musicgen import create_multi_xml, create_pdf, buat_chromosome, get_keyscale, create_midi, single_point_crossover, tournament_selection, mutation
+from musicgen import create_multi_xml, create_pdf, create_chromosome, get_keyscale, create_midi, single_point_crossover, tournament_selection, mutation
 import secrets
 import pyrebase
 import os
@@ -66,7 +66,7 @@ def start():
 		key=str(request.form.get("key"))
 		instrument=str(request.form.get("inst"))
 		
-		population = [buat_chromosome(juml_not, scale, key, population_size) for _ in range(population_size)]
+		population = [create_chromosome(juml_not, scale, key, population_size) for _ in range(population_size)]
 		path = create_midi(population, scale, key, generation_num, instrument)
 		
 		silentremove('static/uploads/user_fig.jpg')

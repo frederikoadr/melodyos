@@ -1,3 +1,5 @@
+# Core genetic algorithm operator
+
 from random import choices, randrange, sample
 from datetime import datetime, time
 from music21 import instrument, note, stream, converter, midi, scale, audioSearch, alpha, configure, key, environment, metadata
@@ -16,7 +18,7 @@ noteLength = [.5, 1, 2]
 Chromosome = stream.Stream()
 time_folder = str(int(datetime.now().timestamp()))
 
-def buat_chromosome(jumlNot, scale, key, population_size) -> Chromosome:
+def create_chromosome(jumlNot, scale, key, population_size) -> Chromosome:
     myscale = get_keyscale(scale, key)
     for x in range (population_size):
         littleMelody = stream.Stream()
