@@ -12,10 +12,13 @@ import jsonpickle
 import pandas as pd
 from copy import deepcopy
 from flask_session import Session
+from dotenv import load_dotenv
 
+
+load_dotenv()
 
 app = Flask(__name__)
-app.secret_key = 'SECRET_KEY' #secrets.token_urlsafe(16)
+app.secret_key = os.getenv('SECRET_KEY') #secrets.token_urlsafe(16)
 UPLOAD_FOLDER = 'uploads/'
 app.config['SESSION_REFRESH_EACH_REQUEST'] = False
 app.config['SESSION_PERMANENT'] = True
@@ -23,18 +26,19 @@ app.config.update(SESSION_COOKIE_SAMESITE="None", SESSION_COOKIE_SECURE=True)
 app.config['SESSION_TYPE'] = 'filesystem'
 Session(app)
 
-firebaseConfig = {
-  'apiKey': "AIzaSyC8BWJ8Y_9Y1I5em8tDywHFWT21tm8ThKo",
-  'authDomain': "melodyos.firebaseapp.com",
-  'databaseURL': "https://melodyos-default-rtdb.asia-southeast1.firebasedatabase.app",
-  'projectId': "melodyos",
-  'storageBucket': "melodyos.appspot.com",
-  'messagingSenderId': "967726961597",
-  'appId': "1:967726961597:web:cda3c38ffbed17488638d4",
-  'measurementId': "G-84JQ3BP3ZL"
+# Set up Firebase config using environment variables
+firebase_config = {
+    'apiKey': os.getenv('FIREBASE_API_KEY'),
+    'authDomain': os.getenv('FIREBASE_AUTH_DOMAIN'),
+    'databaseURL': os.getenv('FIREBASE_DATABASE_URL'),
+    'projectId': os.getenv('FIREBASE_PROJECT_ID'),
+    'storageBucket': os.getenv('FIREBASE_STORAGE_BUCKET'),
+    'messagingSenderId': os.getenv('FIREBASE_MESSAGING_SENDER_ID'),
+    'appId': os.getenv('FIREBASE_APP_ID'),
+    'measurementId': os.getenv('FIREBASE_MEASUREMENT_ID')
 }
 
-firebase = pyrebase.initialize_app(firebaseConfig)
+firebase = pyrebase.initialize_app(firebase_config)
 db=firebase.database()
 
 def silentremove(filename):
@@ -52,7 +56,6 @@ def start():
 	user_dict = {}
 	generation_num = 1
 	if request.method=='POST':
-		# token = secrets.token_urlsafe(16)
 		sum_fitnesses = []
 
 		ukey = str(request.form.get("Nickname"))
@@ -217,7 +220,6 @@ def data():
 	ax_single.cla()
 	s = pd.Series(mean_y_axis)
 	df_rolling = s.rolling(2, min_periods=1).mean()
-	# y_avg = [np.mean(mean_y_axis)] * len(mean_x_axis)
 	for i, v in enumerate(mean_y_axis):
 		ax_single.text(i, v+25, "%d" %v, ha="center")
 	ax_single.plot(mean_x_axis, mean_y_axis, 'o--', label='Mean')
