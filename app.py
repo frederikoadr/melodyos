@@ -15,15 +15,18 @@ from flask_session import Session
 from dotenv import load_dotenv
 
 
+load_dotenv()
+
 app = Flask(__name__)
-app.secret_key = 'SECRET_KEY' #secrets.token_urlsafe(16)
+app.secret_key = os.getenv('SECRET_KEY') #secrets.token_urlsafe(16)
 UPLOAD_FOLDER = 'uploads/'
 app.config['SESSION_REFRESH_EACH_REQUEST'] = False
 app.config['SESSION_PERMANENT'] = True
 app.config['SESSION_TYPE'] = 'filesysterm'
 Session(app)
 
- firebase_config = {
+# Set up Firebase config using environment variables
+firebase_config = {
     'apiKey': os.getenv('FIREBASE_API_KEY'),
     'authDomain': os.getenv('FIREBASE_AUTH_DOMAIN'),
     'databaseURL': os.getenv('FIREBASE_DATABASE_URL'),
@@ -52,7 +55,6 @@ def start():
 	user_dict = {}
 	generation_num = 1
 	if request.method=='POST':
-		# token = secrets.token_urlsafe(16)
 		sum_fitnesses = []
 
 		ukey = str(request.form.get("Nickname"))
@@ -217,7 +219,6 @@ def data():
 	ax_single.cla()
 	s = pd.Series(mean_y_axis)
 	df_rolling = s.rolling(2, min_periods=1).mean()
-	# y_avg = [np.mean(mean_y_axis)] * len(mean_x_axis)
 	for i, v in enumerate(mean_y_axis):
 		ax_single.text(i, v+25, "%d" %v, ha="center")
 	ax_single.plot(mean_x_axis, mean_y_axis, 'o--', label='Mean')
