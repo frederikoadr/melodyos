@@ -1,0 +1,7 @@
+# .vercelignore
+*.pyc
+__pycache__
+*.git
+*.log
+node_modules
+tests
