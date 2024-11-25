@@ -5,6 +5,7 @@ name = "pypi"
  
 [packages]
 flask = "*"
- 
+gunicorn = "*"
+
 [requires]
 python_version = "3.12.7"
