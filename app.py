@@ -16,13 +16,12 @@ from dotenv import load_dotenv
 
 
 load_dotenv()
-
 app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY') #secrets.token_urlsafe(16)
 UPLOAD_FOLDER = 'uploads/'
 app.config['SESSION_REFRESH_EACH_REQUEST'] = False
 app.config['SESSION_PERMANENT'] = True
-app.config['SESSION_TYPE'] = 'filesysterm'
+app.config['SESSION_TYPE'] = 'filesystem'
 Session(app)
 
 # Set up Firebase config using environment variables
