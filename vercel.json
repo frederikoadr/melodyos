@@ -11,5 +11,10 @@
       "src": "/(.*)",
       "dest": "/app.py"
     }
-  ]
+  ],
+  "functions": {
+    "api/**/*.py": {
+      "excludeFiles": "venv/**,.venv/**,env/**,node_modules/**,tests/**,__pycache__/**,*.pyc,.git/**,docs/**"
+    }
+  }
 }
