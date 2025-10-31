@@ -1,20 +1,14 @@
 {
-  "version": 2,
-  "builds": [
-    {
-      "src": "app.py",
-      "use": "@vercel/python"
+  "functions": {
+    "api/**/*.py": {
+      "runtime": "@vercel/python",
+      "excludeFiles": "**/*,venv/**,.venv/**,env/**,node_modules/**,tests/**,__pycache__/**,*.pyc,.git/**,docs/**"
     }
-  ],
+  },
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "/app.py"
+      "dest": "api/app.py"
     }
-  ],
-  "functions": {
-    "api/**/*.py": {
-      "excludeFiles": "venv/**,.venv/**,env/**,node_modules/**,tests/**,__pycache__/**,*.pyc,.git/**,docs/**"
-    }
-  }
+  ]
 }
