@@ -248,7 +248,7 @@ def data():
 def create_figure(ukey, user_dict):
 	population_num = 4
 
-	plt.style.use('seaborn')
+	plt.style.use('seaborn-v0_8-whitegrid')
 	fig, ax = plt.subplots()
 
 	sum_fit = []
