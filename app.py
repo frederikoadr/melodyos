@@ -5,11 +5,9 @@ from matplotlib import pyplot as plt
 import matplotlib.ticker as mtick
 import numpy as np
 from musicgen import create_multi_xml, create_pdf, create_chromosome, get_keyscale, create_midi, single_point_crossover, tournament_selection, mutation
-import secrets
 import pyrebase
 import os
 import jsonpickle
-import pandas as pd
 from copy import deepcopy
 from flask_session import Session
 from dotenv import load_dotenv
@@ -183,6 +181,7 @@ def data():
 	x_all = []
 	y_all = []
 	users_data = []
+	mean_x_axis = np.array([])  # Initialize mean_x_axis to an empty array
 	for user in users.each():
 		user_count += 1
 		population_num = 4
@@ -216,19 +215,16 @@ def data():
 	save_figure(ax, fig, 'sum')
 
 	ax_single.cla()
-	s = pd.Series(mean_y_axis)
-	df_rolling = s.rolling(2, min_periods=1).mean()
+	mean_list = mean_y_axis
+	df_rolling = rolling_mean(mean_list, window=2)
 	for i, v in enumerate(mean_y_axis):
 		ax_single.text(i, v+25, "%d" %v, ha="center")
 	ax_single.plot(mean_x_axis, mean_y_axis, 'o--', label='Mean')
 	ax_single.plot(mean_x_axis, df_rolling, label='Moving Average')
 	save_figure(ax_single, fig_single, 'avg')
 
-	s = pd.Series(mean_y_axis)
 	ax_single.cla()
-	print(s)
-	print(s.pct_change().mul(100))
-	t = np.mean(s.pct_change().mul(100))
+	t = np.mean(pct_change_percent(mean_list))
 	print(t)
 
 	ax_single.cla()
@@ -269,6 +265,24 @@ def save_figure(ax, fig, pathid):
 	ax.set_ylabel("Presentase ketertarikan/fitness")
 	plt.tight_layout()
 	fig.savefig('static/uploads/fig_' + pathid + '.jpg', dpi=65)
+
+def rolling_mean(arr, window=2):
+    res = []
+    for i in range(len(arr)):
+        start = max(0, i - window + 1)
+        window_slice = arr[start:i+1]
+        res.append(sum(window_slice) / len(window_slice))
+    return res
+  
+def pct_change_percent(arr):
+	res = [0.0]  # Start with 0.0 for consistent float type
+	for i in range(1, len(arr)):
+			prev = arr[i-1]
+			if prev == 0:
+					res.append(0.0)
+			else:
+					res.append((arr[i] - prev)/abs(prev)*100)
+	return res
 
 # main driver function
 if __name__ == '__main__':
