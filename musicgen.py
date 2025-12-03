@@ -148,7 +148,7 @@ def show_score(show_format: str, mel, tngganada, nd_dasar):
     mel.pop(0)
 
 def create_midi(population, tngganada, nd_dasar, generation_id, inst):
-    os.makedirs(f"static/uploads/{time_folder}/{generation_id}", exist_ok=True)
+    os.makedirs(f"/tmp/uploads/{time_folder}/{generation_id}", exist_ok=True)
     allFiles = []
     for count, x in enumerate(population):
         if(inst == "piano"):
@@ -167,45 +167,45 @@ def create_midi(population, tngganada, nd_dasar, generation_id, inst):
             x.insert(instrument.Marimba())
         
         x.keySignature = key.Key(nd_dasar, tngganada)
-        fp=f"static/uploads/{time_folder}/{generation_id}/rank"+ str(count+1) + "_" + nd_dasar + tngganada
+        fp=f"/tmp/uploads/{time_folder}/{generation_id}/rank"+ str(count+1) + "_" + nd_dasar + tngganada
         allFiles.append(fp)
         x.write('midi', fp + '.mid')
         x.pop(0)
         x.pop(0)
 
-    fp_prev = f"static/uploads/{time_folder}/{generation_id-1}"
+    fp_prev = f"/tmp/uploads/{time_folder}/{generation_id-1}"
     if os.path.exists(fp_prev) and os.path.isdir(fp_prev):
         shutil.rmtree(fp_prev)
-        # allFiles.append(f"static/uploads/{time_folder}/{generation_id}/test"+ str(count) +'.mid')
+        # allFiles.append(f"/tmp/uploads/{time_folder}/{generation_id}/test"+ str(count) +'.mid')
     return allFiles
 
 def create_multi_xml(population, tngganada, nd_dasar, generation_id, uname):
-    os.makedirs(f"static/uploads/{time_folder}/{generation_id}", exist_ok=True)
+    os.makedirs(f"/tmp/uploads/{time_folder}/{generation_id}", exist_ok=True)
     for count, x in enumerate(population):
         x.keySignature = key.Key(nd_dasar, tngganada)
         x.insert(0, metadata.Metadata())
         x.metadata.title = f'Melodyos {nd_dasar} {tngganada}'
         x.metadata.composer = uname
-        filepath = f"static/uploads/{time_folder}/{generation_id}/rank"+ str(count+1) + "_" + nd_dasar + tngganada
+        filepath = f"/tmp/uploads/{time_folder}/{generation_id}/rank"+ str(count+1) + "_" + nd_dasar + tngganada
         x.write('musicxml', fp=filepath)
         x.pop(0)
 
 def create_pdf(music21stream, tngganada, nd_dasar, generation_id, count):
-    os.makedirs(f"static/uploads/{time_folder}/{generation_id}", exist_ok=True)
+    os.makedirs(f"/tmp/uploads/{time_folder}/{generation_id}", exist_ok=True)
     conv =  converter.subConverters.ConverterLilypond()
     us = environment.UserSettings()
     us['lilypondPath'] = 'LilyPond/usr/bin/lilypond.exe'
     music21stream.keySignature = key.Key(nd_dasar, tngganada)
-    filepath = f"static/uploads/{time_folder}/{generation_id}/rank"+ count + "_" + nd_dasar + tngganada
+    filepath = f"/tmp/uploads/{time_folder}/{generation_id}/rank"+ count + "_" + nd_dasar + tngganada
     respath = conv.write(music21stream, fmt = 'lilypond', fp=filepath, subformats = ['pdf'])
     music21stream.pop(0)
     return respath
 
 def create_multi_pdf(population, tngganada, nd_dasar, generation_id):
-    os.makedirs(f"static/uploads/{time_folder}/{generation_id}", exist_ok=True)
+    os.makedirs(f"/tmp/uploads/{time_folder}/{generation_id}", exist_ok=True)
     conv =  converter.subConverters.ConverterLilypond()
     for count, x in enumerate(population):
         x.keySignature = key.Key(nd_dasar, tngganada)
-        filepath = f"static/uploads/{time_folder}/{generation_id}/rank"+ str(count) + "_" + nd_dasar + tngganada
+        filepath = f"/tmp/uploads/{time_folder}/{generation_id}/rank"+ str(count) + "_" + nd_dasar + tngganada
         conv.write(x, fmt = 'lilypond', fp=filepath, subformats = ['pdf'])
         x.pop(0)

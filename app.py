@@ -70,7 +70,7 @@ def start():
 		population = [create_chromosome(juml_not, scale, key, population_size) for _ in range(population_size)]
 		path = create_midi(population, scale, key, generation_num, instrument)
 		
-		silentremove('static/uploads/user_fig.jpg')
+		silentremove('/tmp/uploads/user_fig.jpg')
 
 		popu_encoded = jsonpickle.encode(population)
 
@@ -239,7 +239,7 @@ def data():
 	ax_single.set_xlabel("Jumlah iterasi")
 	ax_single.set_ylabel("Jumlah pengguna")
 	plt.tight_layout()
-	fig_single.savefig('static/uploads/fig_histogram.jpg', dpi=65)
+	fig_single.savefig('/tmp/uploads/fig_histogram.jpg', dpi=65)
 	epoch_mean = np.mean(list_iteration)
 	return render_template("data.html", users_data=users_data, epoch_mean=epoch_mean, s=s.values.tolist() , t=s.pct_change().mul(100).values.tolist())
 
@@ -266,7 +266,7 @@ def save_figure(ax, fig, pathid):
 	ax.set_xlabel("Iterasi / Generasi-1")
 	ax.set_ylabel("Presentase ketertarikan/fitness")
 	plt.tight_layout()
-	fig.savefig('static/uploads/fig_' + pathid + '.jpg', dpi=65)
+	fig.savefig('/tmp/uploads/fig_' + pathid + '.jpg', dpi=65)
 
 def rolling_mean(arr, window=2):
     res = []
