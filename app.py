@@ -259,7 +259,7 @@ def data():
     )
 
 
-@app.route('/midi/<time_folder>/<generation_id>/<path:filename>')
+@app.route('/tmp/uploads/<time_folder>/<generation_id>/<path:filename>')
 def get_midi(time_folder, generation_id, filename):
     file_path = f"/tmp/uploads/{time_folder}/{generation_id}/{filename}"
     if not os.path.exists(file_path):
