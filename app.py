@@ -20,6 +20,8 @@ UPLOAD_FOLDER = 'uploads/'
 app.config['SESSION_REFRESH_EACH_REQUEST'] = False
 app.config['SESSION_PERMANENT'] = True
 app.config['SESSION_TYPE'] = 'filesystem'
+app.config['SESSION_FILE_DIR'] = '/tmp/flask_session'
+app.config['SESSION_FILE_THRESHOLD'] = 500
 Session(app)
 
 # Set up Firebase config using environment variables
