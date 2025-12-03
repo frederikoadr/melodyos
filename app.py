@@ -1,6 +1,6 @@
-from collections import UserDict
+from collections import Counter, UserDict
 import random
-from flask import Flask, render_template, request, session, current_app, flash, redirect, url_for, send_from_directory, current_app
+from flask import Flask, render_template, request, session, send_file
 from matplotlib import pyplot as plt
 import matplotlib.ticker as mtick
 import numpy as np
@@ -79,7 +79,7 @@ def start():
 		session['user_dict'] = user_dict
 
 		db.child("users").child(ukey).set(user_dict[ukey]["db_data"])
-
+  
 	return render_template("evaluate.html", path=path, generation_num=user_dict[ukey]["db_data"][2])
 
 @app.route('/evaluate', methods=['POST', 'GET'])
@@ -174,74 +174,97 @@ def download():
 
 @app.route('/datadmin', methods=['POST', 'GET'])
 def data():
-	users=db.child("users").get()
-	plt.style.use('seaborn')
-	fig, ax = plt.subplots()
-	fig_single, ax_single = plt.subplots()
-	user_count = 0
-	highest = 0
-	x_all = []
-	y_all = []
-	users_data = []
-	mean_x_axis = np.array([])  # Initialize mean_x_axis to an empty array
-	for user in users.each():
-		user_count += 1
-		population_num = 4
+    users = db.child("users").get()
 
-		sum_fit = []
-		for single_sum_fit in user.val()[5]:
-			single_sum_fit = single_sum_fit/(population_num*5)*100
-			sum_fit.append(single_sum_fit)
-		
-		gen_list = np.arange(1, len(sum_fit)+1)
+    user_count = 0
+    x_all = []      # each user’s generation indices
+    y_all = []      # each user’s normalized fitness per generation
+    users_data = [] # metadata table
 
-		x_all.append(gen_list)
-		y_all.append(sum_fit)
+    for user in users.each():
+        user_count += 1
+        population_num = 4  # constant in your code
 
-		ax.plot(gen_list, sum_fit, 'o-', label='User '+str(user_count))
+        # user.val()[5] is sum_fitness list
+        raw_sum_fit = user.val()[5]  # list of integers (sum of ratings)
+        sum_fit_pct = normalize_fitness(raw_sum_fit, population_num=population_num, max_rating=5)
 
-		ax_single.cla()
-    
-		ax_single.plot(gen_list, sum_fit, 's-', label='User '+str(user_count))
-		save_figure(ax_single, fig_single, str(user_count))
-		
-		users_data.append([user.key(), user.val()[0], user.val()[1], user.val()[2], user.val()[3], user.val()[6], user.val()[7], user.val()[8]])
+        gen_list = list(range(1, len(sum_fit_pct) + 1))
 
-	for i in x_all:
-		if highest < max(i):
-			highest = max(i)
-			mean_x_axis = i
-	ys_interp = [np.interp(mean_x_axis, x_all[i], y_all[i]) for i in range(len(x_all))]
-	mean_y_axis = np.mean(ys_interp, axis=0)
-	ax.plot(mean_x_axis, mean_y_axis, '--', label='Mean')
-	save_figure(ax, fig, 'sum')
+        x_all.append(gen_list)
+        y_all.append(sum_fit_pct)
 
-	ax_single.cla()
-	mean_list = mean_y_axis
-	df_rolling = rolling_mean(mean_list, window=2)
-	for i, v in enumerate(mean_y_axis):
-		ax_single.text(i, v+25, "%d" %v, ha="center")
-	ax_single.plot(mean_x_axis, mean_y_axis, 'o--', label='Mean')
-	ax_single.plot(mean_x_axis, df_rolling, label='Moving Average')
-	save_figure(ax_single, fig_single, 'avg')
+        # users_data row: [key, scale, key, generation, instrument, age, experience, email]
+        users_data.append([
+            user.key(),   # nickname
+            user.val()[0],  # scale
+            user.val()[1],  # key
+            user.val()[2],  # last generation
+            user.val()[3],  # instrument
+            user.val()[6],  # age
+            user.val()[7],  # experience
+            user.val()[8],  # email
+        ])
 
-	ax_single.cla()
-	t = np.mean(pct_change_percent(mean_list))
-	print(t)
+    # If no users, just render empty
+    if not x_all:
+        return render_template(
+            "data.html",
+            users_data=[],
+            epoch_mean=0,
+            mean_x_axis=[],
+            mean_y_axis=[],
+            rolling_avg=[],
+            pct_changes=[],
+            hist_x=[],
+            hist_counts=[]
+        )
 
-	ax_single.cla()
-	list_iteration = []
-	for j in users_data:
-		list_iteration.append(j[3]-1)
-	ax_single.hist(list_iteration)
-	ax_single.xaxis.set_major_locator(mtick.MultipleLocator(1))
-	ax_single.set_title("Jumlah iterasi di setiap pengguna")
-	ax_single.set_xlabel("Jumlah iterasi")
-	ax_single.set_ylabel("Jumlah pengguna")
-	plt.tight_layout()
-	fig_single.savefig('/tmp/uploads/fig_histogram.jpg', dpi=65)
-	epoch_mean = np.mean(list_iteration)
-	return render_template("data.html", users_data=users_data, epoch_mean=epoch_mean, s=s.values.tolist() , t=s.pct_change().mul(100).values.tolist())
+    # Build mean curve per generation index
+    max_len = max(len(xs) for xs in x_all)
+    mean_x_axis = list(range(1, max_len + 1))
+
+    # collect values per generation position
+    stacked = [[] for _ in range(max_len)]
+    for xs, ys in zip(x_all, y_all):
+        for idx, val in enumerate(ys):
+            stacked[idx].append(val)
+
+    mean_y_axis = [
+        (sum(vals) / len(vals)) if vals else 0.0
+        for vals in stacked
+    ]
+
+    # Rolling mean & percent change
+    rolling_avg = rolling_mean(mean_y_axis, window=2)
+    pct_changes = pct_change_percent(mean_y_axis)
+
+    # Histogram of iterations per user (generations - 1)
+    list_iteration = [row[3] - 1 for row in users_data]  # row[3] is generation
+    hist_x, hist_counts = build_histogram(list_iteration)
+
+    epoch_mean = sum(list_iteration) / len(list_iteration) if list_iteration else 0.0
+
+    # We pass ready-to-plot data to template
+    return render_template(
+        "data.html",
+        users_data=users_data,
+        epoch_mean=epoch_mean,
+        mean_x_axis=mean_x_axis,
+        mean_y_axis=mean_y_axis,
+        rolling_avg=rolling_avg,
+        pct_changes=pct_changes,
+        hist_x=hist_x,
+        hist_counts=hist_counts
+    )
+
+
+@app.route('/midi/<time_folder>/<generation_id>/<path:filename>')
+def get_midi(time_folder, generation_id, filename):
+    file_path = f"/tmp/uploads/{time_folder}/{generation_id}/{filename}"
+    if not os.path.exists(file_path):
+        os.abort()
+    return send_file(file_path, mimetype="audio/midi")
 
 def create_figure(ukey, user_dict):
 	population_num = 4
@@ -285,6 +308,22 @@ def pct_change_percent(arr):
 			else:
 					res.append((arr[i] - prev)/abs(prev)*100)
 	return res
+
+def normalize_fitness(sum_fitnesses, population_num=4, max_rating=5):
+    """Convert sum of ratings into percentage [0, 100]."""
+    return [(fit / (population_num * max_rating)) * 100 for fit in sum_fitnesses]
+
+def build_histogram(values):
+    """
+    Build histogram data: returns (sorted_labels, counts)
+    like what you'd feed into a bar chart.
+    """
+    if not values:
+        return [], []
+    c = Counter(values)
+    labels = sorted(c.keys())
+    counts = [c[k] for k in labels]
+    return labels, counts
 
 # main driver function
 if __name__ == '__main__':
