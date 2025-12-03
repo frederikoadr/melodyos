@@ -1,6 +1,7 @@
 from collections import Counter, UserDict
 import random
-from flask import Flask, render_template, request, session, send_file
+import traceback
+from flask import Flask, jsonify, render_template, request, session, send_file
 from matplotlib import pyplot as plt
 import matplotlib.ticker as mtick
 import numpy as np
@@ -262,9 +263,30 @@ def data():
 @app.route('/tmp/uploads/<time_folder>/<generation_id>/<path:filename>')
 def get_midi(time_folder, generation_id, filename):
     file_path = f"/tmp/uploads/{time_folder}/{generation_id}/{filename}"
+
+    # Log every access (useful for Vercel debugging)
+    print(f"[GET MIDI] Requested: {file_path}")
+
+    # 1. File not found
     if not os.path.exists(file_path):
-        os.abort()
-    return send_file(file_path, mimetype="audio/midi")
+        print(f"[GET MIDI] File does NOT exist → {file_path}")
+        # You can return JSON instead of HTML for clearer debugging on Vercel
+        return jsonify({"error": "File not found", "path": file_path}), 404
+
+    # 2. File exists, but Vercel fails to read it for some reason
+    try:
+        print(f"[GET MIDI] Sending file: {file_path}")
+        return send_file(file_path, mimetype="audio/midi")
+    except Exception as e:
+        print("[GET MIDI] ERROR while sending file:", e)
+        traceback.print_exc()
+
+        # more detailed response while debugging
+        return jsonify({
+            "error": "Failed to send MIDI file",
+            "exception": str(e),
+            "path": file_path
+        }), 500
 
 def create_figure(ukey, user_dict):
 	population_num = 4
