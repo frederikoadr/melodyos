@@ -70,12 +70,12 @@
                             <div class="new__overlay"></div>
                             
                             <h3>Melody rank {{loop.index}}</h3>
-                            <a href="{{result}}.mid" class="button download__button"><i class='bx bx-download'></i> .MIDI</a>
+                            <a href="{{result}}" class="button download__button"><i class='bx bx-download'></i> .MIDI</a>
                             <!-- <a href="downloadpdf/{{loop.index}}" class="button download__button"><i class='bx bx-download'></i> .PDF</a> -->
                             <a href="{{result}}.musicxml" class="button download__button"><i class='bx bx-download'></i> .XML</a>
                             <div id="midi{{loop.index}}" class="section3">
                                 <midi-player
-                                    src={{result}}.mid
+                                    src={{result}}
                                     sound-font="https://storage.googleapis.com/magentadata/js/soundfonts/sgm_plus" visualizer="#midi{{loop.index}} midi-visualizer">
                                 </midi-player>				
                                 <midi-visualizer type="piano-roll"></midi-visualizer>							  
@@ -104,7 +104,7 @@
                     <p>\(n\) = number of melodic variants</p>
                 </div>
                 <div class="celebrate__data">
-                    <img src="static/uploads/fig_single.jpg" alt="gambar tingkat ketertarikan di setiap iterasi">
+                    <img src={{url}} alt="gambar tingkat ketertarikan di setiap iterasi">
                 </div>
             </div>
         </section>

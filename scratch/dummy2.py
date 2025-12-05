@@ -8,7 +8,6 @@ from random import sample
 from datetime import datetime, time
 from random import randint, randrange
 import matplotlib.pyplot as plt
-import numpy as np
 import matplotlib.ticker as mtick
 import pyrebase
 from music21 import common, corpus, instrument, key, note, stream, converter, midi, scale, alpha, environment, chord, interval, roman

@@ -56,16 +56,16 @@
                 Rate Melodies
             </h2>
             <p class="section__subtitle">*please rate each melody then click continue for at least 3 generations, then click download <br> the melody will 'evolve' according to your liking</p>
-            {% if path %}
+            {% if urls %}
                 <form action="/evaluate#rate" method="post">
                 <div class="gift__container grid">
                 <h3>Generation {{generation_num}}</h3>
-                    {% for result in path %}
+                    {% for url in urls %}
                     <article class="gift__card">
                         <h3>Melody rank {{loop.index}}</h3>
                         <div id="midi{{loop.index}}" class="section3">
                             <midi-player
-                                src={{result}}.mid
+                                src={{url}}
                                 sound-font="https://storage.googleapis.com/magentadata/js/soundfonts/sgm_plus" visualizer="#midi{{loop.index}} midi-visualizer">
                             </midi-player>				
                             <midi-visualizer type="piano-roll" class="visualizer">
@@ -95,13 +95,13 @@
                     <div class="content">
                         <p>the melody can be improved again by continuously rating or evaluating</p>
                         <input type="hidden" name="step">
-                        <input type="hidden" name="numMelodies" value={{path|count}}>
+                        <input type="hidden" name="numMelodies" value={{urls|count}}>
                         <button type="submit" value="submit" class="button">Continue</button>
                         </form>
                         {% if generation_num > 2%}
                         <form action="/download#new" method="post">
                         <p>or if that's enough, you can start downloading the results</p>
-                        <input type="hidden" name="pathMelodies" value={{path|count}}>
+                        <input type="hidden" name="pathMelodies" value={{urls|count}}>
                         <button type="submit" name="step" class="button">Download</button>
                         </form>
                         {% endif %}
@@ -129,12 +129,12 @@
                             <div class="new__overlay"></div>
                             
                             <h3>Melody rank {{loop.index}}</h3>
-                            <a href="{{result}}.mid" class="button download__button"><i class='bx bx-download'></i> .MIDI</a>
+                            <a href="{{result}}" class="button download__button"><i class='bx bx-download'></i> .MIDI</a>
                             <!-- <a href="{{result}}.pdf" class="button download__button"><i class='bx bx-download'></i> .PDF</a> -->
                             <a href="{{result}}.musicxml" class="button download__button"><i class='bx bx-download'></i> .XML</a>
                             <div id="midi{{loop.index}}" class="section3">
                                 <midi-player
-                                    src={{result}}.mid
+                                    src={{result}}
                                     sound-font="https://storage.googleapis.com/magentadata/js/soundfonts/sgm_plus" visualizer="#midi{{loop.index}} midi-visualizer">
                                 </midi-player>				
                                 <midi-visualizer type="piano-roll"></midi-visualizer>							  

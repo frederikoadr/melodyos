@@ -2,13 +2,14 @@
 
 from random import choices, randrange, sample
 from datetime import datetime, time
+from uuid import uuid4
 from music21 import instrument, note, stream, converter, midi, scale, audioSearch, alpha, configure, key, environment, metadata
 import os
 import shutil
 import matplotlib.pyplot as plt
-import numpy as np
 import random
-import click
+from appwrite.input_file import InputFile
+
 
 KEYS = ["C", "C#", "Db", "D", "D#", "Eb", "E", "F", "F#", "Gb", "G", "G#", "Ab", "A", "A#", "Bb", "B"]
 noteLength = [.5, 1, 2]
@@ -147,9 +148,16 @@ def show_score(show_format: str, mel, tngganada, nd_dasar):
     mel.show(show_format)
     mel.pop(0)
 
-def create_midi(population, tngganada, nd_dasar, generation_id, inst):
-    os.makedirs(f"/tmp/uploads/{time_folder}/{generation_id}", exist_ok=True)
-    allFiles = []
+def create_midi(
+    population,
+    tngganada,
+    nd_dasar,
+    generation_id,
+    inst,
+):
+    base_dir = f"/tmp/uploads/{time_folder}/{generation_id}"
+    os.makedirs(base_dir, exist_ok=True)
+    file_paths = []
     for count, x in enumerate(population):
         if(inst == "piano"):
             x.insert(instrument.Piano())
@@ -167,17 +175,17 @@ def create_midi(population, tngganada, nd_dasar, generation_id, inst):
             x.insert(instrument.Marimba())
         
         x.keySignature = key.Key(nd_dasar, tngganada)
-        fp=f"/tmp/uploads/{time_folder}/{generation_id}/rank"+ str(count+1) + "_" + nd_dasar + tngganada
-        allFiles.append(fp)
-        x.write('midi', fp + '.mid')
+        filename = f"rank{count+1}_{nd_dasar}{tngganada}.mid"
+        local_path = os.path.join(base_dir, filename)
+        x.write('midi', local_path)
         x.pop(0)
         x.pop(0)
+        file_paths.append(local_path)
 
     fp_prev = f"/tmp/uploads/{time_folder}/{generation_id-1}"
     if os.path.exists(fp_prev) and os.path.isdir(fp_prev):
         shutil.rmtree(fp_prev)
-        # allFiles.append(f"/tmp/uploads/{time_folder}/{generation_id}/test"+ str(count) +'.mid')
-    return allFiles
+    return file_paths
 
 def create_multi_xml(population, tngganada, nd_dasar, generation_id, uname):
     os.makedirs(f"/tmp/uploads/{time_folder}/{generation_id}", exist_ok=True)
