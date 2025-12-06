@@ -185,13 +185,13 @@ def evaluate():
             user_dict[ukey]["db_data"][2],
             user_dict[ukey]["db_data"][3],
             )
-        user_dict[ukey]["db_data"][4] = local_paths
-
-
+        
         midi_urls = []
         for path in local_paths:
             url = storage_service.upload_file(path)
             midi_urls.append(url)
+            
+        user_dict[ukey]["db_data"][4] = midi_urls
         
         session['ukey'] = ukey
         session['user_dict'] = user_dict
