@@ -14,15 +14,21 @@ from dotenv import load_dotenv
 from appwrite.client import Client
 from appwrite.services.storage import Storage
 from storage_service import StorageService
+import redis
 
 
 load_dotenv()
 app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY') #secrets.token_urlsafe(16)
 UPLOAD_FOLDER = 'uploads/'
+redis_url = os.getenv('REDIS_URL')
+r = redis.from_url(redis_url)
+app.config.update(
+    SESSION_TYPE='redis',
+    SESSION_REDIS=r,
+)
 app.config['SESSION_REFRESH_EACH_REQUEST'] = False
 app.config['SESSION_PERMANENT'] = True
-app.config['SESSION_TYPE'] = 'filesystem'
 app.config['SESSION_FILE_DIR'] = '/tmp/flask_session'
 app.config['SESSION_FILE_THRESHOLD'] = 500
 Session(app)
@@ -114,7 +120,6 @@ def start():
 
         db.child("users").child(ukey).set(user_dict[ukey]["db_data"])
 
-        print(session['user_dict'])
         return render_template(
             "evaluate.html",
             urls=midi_urls,
@@ -129,10 +134,7 @@ def evaluate():
         if 'user' in session:
             ukey = deepcopy(session['user'])
         user_dict = deepcopy(session['user_dict'])
-        print("user dict" + str(user_dict))
-        # if user_dict:
-        # 	population_size = len(user_dict[ukey]["population"])
-        # else:
+        
         population_size = 4
         popu_decoded = jsonpickle.decode(user_dict[ukey]["population"])
 
