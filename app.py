@@ -1,7 +1,7 @@
 from collections import Counter, UserDict
 import random
 import traceback
-from flask import Flask, jsonify, render_template, request, session, send_file
+from flask import Flask, jsonify, render_template, request, session, send_file, flash, redirect, url_for
 from matplotlib import pyplot as plt
 import matplotlib.ticker as mtick
 from musicgen import create_multi_xml, create_pdf, create_chromosome, get_keyscale, create_midi, single_point_crossover, tournament_selection, mutation
@@ -114,6 +114,7 @@ def start():
 
         db.child("users").child(ukey).set(user_dict[ukey]["db_data"])
 
+        print(session['user_dict'])
         return render_template(
             "evaluate.html",
             urls=midi_urls,
@@ -128,6 +129,7 @@ def evaluate():
         if 'user' in session:
             ukey = deepcopy(session['user'])
         user_dict = deepcopy(session['user_dict'])
+        print("user dict" + str(user_dict))
         # if user_dict:
         # 	population_size = len(user_dict[ukey]["population"])
         # else:
