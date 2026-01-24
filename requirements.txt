@@ -8,7 +8,7 @@ midi2audio==0.1.1
 music21==7.3.3
 numpy==1.26.4
 Pyrebase4==4.7.1
-cffi==1.16.1
+cffi==2.0.0
 cryptography==46.0.3
 python-dotenv==1.0.1
 gunicorn==22.0.0
