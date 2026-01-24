@@ -2,8 +2,6 @@ from collections import Counter, UserDict
 import random
 import traceback
 from flask import Flask, jsonify, render_template, request, session, send_file, flash, redirect, url_for
-from matplotlib import pyplot as plt
-import matplotlib.ticker as mtick
 from musicgen import create_multi_xml, create_pdf, create_chromosome, get_keyscale, create_midi, single_point_crossover, tournament_selection, mutation
 import pyrebase
 import os
@@ -345,6 +343,17 @@ def get_midi(time_folder, generation_id, filename):
 def create_figure(ukey, user_dict) -> str:
     population_num = 4
 
+    # Lazy-import matplotlib so the app can start even if NumPy/matplotlib
+    # C-extensions are unavailable in the runtime/build environment.
+    try:
+        import matplotlib
+        matplotlib.use('Agg')
+        from matplotlib import pyplot as plt
+        import matplotlib.ticker as mtick
+    except Exception as e:
+        print("[WARN] matplotlib/numpy import failed, skipping figure:", e)
+        return ""
+
     plt.style.use('seaborn-v0_8-whitegrid')
     fig, ax = plt.subplots()
 
@@ -355,21 +364,27 @@ def create_figure(ukey, user_dict) -> str:
 
     gen_list = list(range(1, len(sum_fit) + 1))
     ax.plot(gen_list, sum_fit, 'o-', label=ukey)
-    url = save_figure(ax, fig, ukey)
+    url = save_figure(ax, fig, ukey, plt=plt, mtick=mtick)
     return url
 
-def save_figure(ax, fig, pathid) -> str:
-    ax.yaxis.set_major_formatter(mtick.PercentFormatter())
-    ax.xaxis.set_major_locator(mtick.MultipleLocator(1))
+def save_figure(ax, fig, pathid, plt=None, mtick=None) -> str:
+    if mtick:
+        ax.yaxis.set_major_formatter(mtick.PercentFormatter())
+        ax.xaxis.set_major_locator(mtick.MultipleLocator(1))
     ax.legend(loc='best')
     ax.set_title("Tingkat ketertarikan/fitness di setiap iterasi")
     ax.set_xlabel("Iterasi / Generasi-1")
     ax.set_ylabel("Presentase ketertarikan/fitness")
-    plt.tight_layout()
+    if plt:
+        plt.tight_layout()
     local_path = '/tmp/uploads/fig_' + pathid + '.jpg'
-    fig.savefig(local_path, dpi=70)
-    url = storage_service.upload_file(local_path)
-    return url
+    try:
+        fig.savefig(local_path, dpi=70)
+        url = storage_service.upload_file(local_path)
+        return url
+    except Exception as e:
+        print("[WARN] failed saving/uploading figure:", e)
+        return ""
 
 def rolling_mean(arr, window=2):
     res = []

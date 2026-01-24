@@ -6,7 +6,6 @@ from uuid import uuid4
 from music21 import instrument, note, stream, converter, midi, scale, audioSearch, alpha, configure, key, environment, metadata
 import os
 import shutil
-import matplotlib.pyplot as plt
 import random
 from appwrite.input_file import InputFile
 
