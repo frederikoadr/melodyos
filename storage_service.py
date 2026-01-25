@@ -32,3 +32,6 @@ class StorageService:
             f"?project={self.project_id}"
         )
         return download_url
+    
+    def to_download_urls(self, urls: list[str]) -> list[str]:
+        return [url.replace("/view?", "/download?") for url in urls]

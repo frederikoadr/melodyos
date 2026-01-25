@@ -227,6 +227,8 @@ def download():
             print('[WARN] firebase DB not initialized — skipping users write')
 
         fig_url = create_figure(ukey, user_dict)
+        
+        user_dict[ukey]["db_data"][4] = storage_service.to_download_urls(user_dict[ukey]["db_data"][4])
 
     return render_template("download.html", url=fig_url, user_dict=user_dict[ukey]["db_data"], done=True)
 
