@@ -3,7 +3,8 @@ import random
 import traceback
 from flask import Flask, jsonify, render_template, request, session, send_file, flash, redirect, url_for
 from musicgen import create_multi_xml, create_pdf, create_chromosome, get_keyscale, create_midi, single_point_crossover, tournament_selection, mutation
-import pyrebase
+import firebase_admin
+from firebase_admin import credentials, db as firebase_db
 import os
 import jsonpickle
 from copy import deepcopy
@@ -40,20 +41,27 @@ client.set_key(os.getenv("APPWRITE_API_KEY"))
 storage = Storage(client)
 storage_service = StorageService()
 
-# Set up Firebase config using environment variables
-firebase_config = {
-    'apiKey': os.getenv('FIREBASE_API_KEY'),
-    'authDomain': os.getenv('FIREBASE_AUTH_DOMAIN'),
-    'databaseURL': os.getenv('FIREBASE_DATABASE_URL'),
-    'projectId': os.getenv('FIREBASE_PROJECT_ID'),
-    'storageBucket': os.getenv('FIREBASE_STORAGE_BUCKET'),
-    'messagingSenderId': os.getenv('FIREBASE_MESSAGING_SENDER_ID'),
-    'appId': os.getenv('FIREBASE_APP_ID'),
-    'measurementId': os.getenv('FIREBASE_MEASUREMENT_ID')
-}
+# Initialize Firebase Admin (handles DB operations formerly done via pyrebase)
+firebase_db_ref = None
+try:
+    # Prefer a service account JSON provided in env var `FIREBASE_SERVICE_ACCOUNT_JSON`.
+    # Fallback to a path set in `GOOGLE_APPLICATION_CREDENTIALS` or to ADC.
+    sa_json = os.getenv('FIREBASE_SERVICE_ACCOUNT_JSON')
+    if sa_json:
+        import json as _json
+        cred = credentials.Certificate(_json.loads(sa_json))
+    elif os.getenv('GOOGLE_APPLICATION_CREDENTIALS'):
+        cred = credentials.Certificate(os.getenv('GOOGLE_APPLICATION_CREDENTIALS'))
+    else:
+        cred = credentials.ApplicationDefault()
 
-firebase = pyrebase.initialize_app(firebase_config)
-db=firebase.database()
+    firebase_admin.initialize_app(cred, {
+        'databaseURL': os.getenv('FIREBASE_DATABASE_URL')
+    })
+    firebase_db_ref = firebase_db.reference('/')
+except Exception as e:
+    print('[WARN] firebase-admin initialization failed:', e)
+    firebase_db_ref = None
 
 def silentremove(filename):
     try:
@@ -116,7 +124,10 @@ def start():
         session['user'] = ukey
         session['user_dict'] = user_dict
 
-        db.child("users").child(ukey).set(user_dict[ukey]["db_data"])
+        if firebase_db_ref:
+            firebase_db_ref.child('users').child(ukey).set(user_dict[ukey]["db_data"])
+        else:
+            print('[WARN] firebase DB not initialized — skipping users write')
 
         return render_template(
             "evaluate.html",
@@ -210,7 +221,10 @@ def download():
 
         create_multi_xml(popu_decoded, user_dict[ukey]["db_data"][0], user_dict[ukey]["db_data"][1], user_dict[ukey]["db_data"][2], ukey)
 
-        db.child("users").child(ukey).set(user_dict[ukey]["db_data"])
+        if firebase_db_ref:
+            firebase_db_ref.child("users").child(ukey).set(user_dict[ukey]["db_data"])
+        else:
+            print('[WARN] firebase DB not initialized — skipping users write')
 
         fig_url = create_figure(ukey, user_dict)
 
@@ -227,19 +241,20 @@ def download():
 
 @app.route('/datadmin', methods=['POST', 'GET'])
 def data():
-    users = db.child("users").get()
+    users_snapshot = firebase_db_ref.child('users').get() if firebase_db_ref else None
 
     user_count = 0
     x_all = []      # each user’s generation indices
     y_all = []      # each user’s normalized fitness per generation
     users_data = [] # metadata table
 
-    for user in users.each():
+    users_dict = users_snapshot or {}
+    for key, val in users_dict.items():
         user_count += 1
         population_num = 4  # constant in your code
 
-        # user.val()[5] is sum_fitness list
-        raw_sum_fit = user.val()[5]  # list of integers (sum of ratings)
+        # Expect `val` to be a list consistent with previous pyrebase writes
+        raw_sum_fit = val[5] if isinstance(val, (list, tuple)) and len(val) > 5 else []
         sum_fit_pct = normalize_fitness(raw_sum_fit, population_num=population_num, max_rating=5)
 
         gen_list = list(range(1, len(sum_fit_pct) + 1))
@@ -249,14 +264,14 @@ def data():
 
         # users_data row: [key, scale, key, generation, instrument, age, experience, email]
         users_data.append([
-            user.key(),   # nickname
-            user.val()[0],  # scale
-            user.val()[1],  # key
-            user.val()[2],  # last generation
-            user.val()[3],  # instrument
-            user.val()[6],  # age
-            user.val()[7],  # experience
-            user.val()[8],  # email
+            key,                        # nickname
+            val[0] if len(val) > 0 else None,  # scale
+            val[1] if len(val) > 1 else None,  # key
+            val[2] if len(val) > 2 else None,  # last generation
+            val[3] if len(val) > 3 else None,  # instrument
+            val[6] if len(val) > 6 else None,  # age
+            val[7] if len(val) > 7 else None,  # experience
+            val[8] if len(val) > 8 else None,  # email
         ])
 
     # If no users, just render empty
