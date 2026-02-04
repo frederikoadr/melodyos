@@ -124,7 +124,7 @@ Navigate to:
 - **Parents (μ):** Tournament selection chooses μ parents (effectively the whole population by pairwise competitions). In each iteration two candidates are sampled and the higher-rated one wins.
 - **Offspring (λ):** Single-point crossover is applied pairwise to parents, producing λ offspring such that $\lambda = \mu$ (population size is preserved each generation).
 - **Normalized fitness:** For a generation with total rating sum `fit`, percentage fitness is  
-  $fit_\% = \frac{fit}{(population\_num \cdot 5)} \times 100$
+  $fit\\_\% = \frac{fit}{(population\\_num \cdot 5)} \times 100$
 - **Mutation intensity:** For a melody of length $n$ notes, mutation attempts per melody are $k = \lfloor n/4 \rfloor$ with per-attempt probability $p = 0.5$.
   - Expected mutated notes per melody: $\mathbb{E}[M] = k \cdot p$.
   - Probability of at least one mutation: $\mathbb{P}(M \ge 1) = 1 - (1-p)^k$.
